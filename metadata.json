@@ -1,0 +1,6 @@
+{
+  "name": "SkillGap AI",
+  "description": "AI-Powered Career Intelligence & Workforce Alignment Platform designed to analyze resumes, detect skill gaps, forecast salary growth, and generate personalized career roadmaps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
