@@ -3,6 +3,7 @@ import { useStore } from './store/useStore';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import ResumeUpload from './components/ResumeUpload';
+import Logo from './components/Logo';
 
 // Page Tabs Elements
 import OverviewTab from './components/OverviewTab';
@@ -182,9 +183,15 @@ export default function App() {
 
             {/* Left Content Column */}
             <div className="flex-1 space-y-6 text-center lg:text-left relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold text-[10px] uppercase tracking-widest leading-none">
-                <span className="flex h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                Next Generation Career Intelligence
+              {/* Premium Clean Brand Logo lockup converts user's draft to live pixel-perfect SVG graphics */}
+              <div className="flex flex-col items-center lg:items-start gap-4 pb-2">
+                <div className="p-4 rounded-3xl bg-[#121A2B]/60 border border-white/5 shadow-2xl hover:border-white/10 transition-colors">
+                  <Logo withSubtitle={true} size="lg" />
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold text-[10px] uppercase tracking-widest leading-none">
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                  Corporate Alignment Engine Live
+                </div>
               </div>
               
               <h1 className="heading-font text-4.5xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white">

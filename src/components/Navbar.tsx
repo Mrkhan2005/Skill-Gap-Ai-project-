@@ -1,5 +1,6 @@
 import { useStore } from '../store/useStore';
 import { Sparkles, Terminal, LogOut, User, Activity, ShieldAlert } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Navbar() {
   const { userSession, logout, setAuthModalOpen, setAuthModalTab, activeDashboardTab, setActiveDashboardTab } = useStore();
@@ -15,14 +16,9 @@ export default function Navbar() {
         {/* Brand Logo */}
         <div 
           onClick={() => setActiveDashboardTab(userSession.isAuthed ? 'overview' : 'landing')} 
-          className="flex items-center gap-2 cursor-pointer group"
+          className="cursor-pointer group flex items-center"
         >
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform duration-300">
-            <Sparkles className="h-5 w-5 animate-pulse" />
-          </div>
-          <span className="heading-font text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-100 to-cyan-400 bg-clip-text text-transparent">
-            SkillGap<span className="text-cyan-400">AI</span>
-          </span>
+          <Logo size="md" />
         </div>
 
         {/* Navigation Elements / Core Workspace Sections */}
