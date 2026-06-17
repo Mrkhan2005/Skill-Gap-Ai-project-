@@ -33,26 +33,251 @@
 
 /* Glassmorphism utilities */
 .glass-panel {
-  background: rgba(18, 26, 43, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Glass Liquid specialized styling */
+.glass-liquid-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 12px 0 rgba(255, 255, 255, 0.02);
+  border-radius: 24px;
 }
 
 .glass-card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .glass-card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.35);
-  border-color: rgba(99, 102, 241, 0.3);
-  background: rgba(18, 26, 43, 0.85);
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 
+    0 20px 40px -15px rgba(99, 102, 241, 0.25),
+    0 0 15px -3px rgba(6, 182, 212, 0.15),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+  border-color: rgba(99, 102, 241, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Liquid morphing animations in the background */
+@keyframes morph-liquid-1 {
+  0%, 100% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  33% {
+    border-radius: 70% 30% 52% 48% / 60% 40% 60% 40%;
+    transform: translate(30px, -40px) rotate(120deg) scale(1.15);
+  }
+  66% {
+    border-radius: 50% 50% 30% 70% / 40% 60% 30% 70%;
+    transform: translate(-20px, 30px) rotate(240deg) scale(0.9);
+  }
+}
+
+@keyframes morph-liquid-2 {
+  0%, 100% {
+    border-radius: 70% 30% 52% 48% / 60% 40% 60% 40%;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+    transform: translate(-40px, 30px) rotate(-180deg) scale(1.2);
+  }
+}
+
+@keyframes morph-liquid-3 {
+  0%, 100% {
+    border-radius: 50% 50% 30% 70% / 40% 60% 30% 70%;
+    transform: translate(0, 0) rotate(0deg) scale(0.95);
+  }
+  50% {
+    border-radius: 65% 35% 65% 35% / 50% 50% 50% 50%;
+    transform: translate(50px, 50px) rotate(180deg) scale(1.1);
+  }
+}
+
+.liquid-blob-1 {
+  animation: morph-liquid-1 22s infinite alternate ease-in-out;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.35) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(0, 0, 0, 0) 100%);
+  filter: blur(50px);
+}
+
+.liquid-blob-2 {
+  animation: morph-liquid-2 28s infinite alternate ease-in-out;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.32) 0%, rgba(59, 130, 246, 0.12) 60%, rgba(0, 0, 0, 0) 100%);
+  filter: blur(50px);
+}
+
+.liquid-blob-3 {
+  animation: morph-liquid-3 25s infinite alternate ease-in-out;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, rgba(79, 70, 229, 0.1) 60%, rgba(0, 0, 0, 0) 100%);
+  filter: blur(60px);
+}
+
+/* Base Body Update for Glass Liquid Theme */
+body {
+  background: radial-gradient(ellipse at bottom, #0d1224, #05070f);
+  color: #F8FAFC;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Glass-like tab buttons with active state glow effects */
+.glass-tab-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.glass-tab-btn-active {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.25) 0%, rgba(6, 182, 212, 0.2) 100%);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 
+    0 0 20px -3px rgba(79, 70, 229, 0.3),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+/* Glass Form Inputs */
+.glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 
+    0 0 15px -3px rgba(99, 102, 241, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+  outline: none;
 }
 
 /* AI mesh gradient background helper */
 .ai-glow-bg {
-  background: radial-gradient(circle at 50% -20%, rgba(79, 70, 229, 0.18) 0%, rgba(6, 182, 212, 0.08) 40%, rgba(11, 16, 32, 0) 70%);
+  background: radial-gradient(circle at 50% -20%, rgba(79, 70, 229, 0.12) 0%, rgba(6, 182, 212, 0.06) 40%, rgba(11, 16, 32, 0) 70%);
+}
+
+/* Dynamic Global Cursor Glow Layer - Customizable & High Performance */
+.cursor-glow-radial {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(
+    circle, 
+    rgba(99, 102, 241, 0.14) 0%, 
+    rgba(6, 182, 212, 0.05) 45%, 
+    rgba(15, 23, 42, 0) 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate3d(-50%, -50%, 0);
+  z-index: 2; /* Sits above standard background blobs, but below index interactive controls */
+  mix-blend-mode: screen;
+  filter: blur(25px);
+  will-change: transform;
+  transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+  opacity: 0; /* Opacity resolves smoothly on mouse entrance */
+}
+
+/* Bento Grid / Border Reveal Glow Effect */
+.glow-card {
+  position: relative;
+  background: rgba(15, 23, 42, 0.45);
+  border-radius: 24px;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+/* Base background layer behind content - dynamic radial reveal */
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0px;
+  border-radius: inherit;
+  background: radial-gradient(
+    350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(99, 102, 241, 0.06),
+    transparent 40%
+  );
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+/* Premium Card border glowing reveal */
+.glow-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px; /* Creates the perfect 1px premium border mask */
+  background: radial-gradient(
+    250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(99, 102, 241, 0.32),
+    rgba(6, 182, 212, 0.12) 30%,
+    transparent 60%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.glow-card:hover::before,
+.glow-card:hover::after {
+  opacity: 1;
+}
+
+/* Interactive Glowing Button/Badge */
+.glow-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.glow-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    100px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(255, 255, 255, 0.15),
+    transparent 60%
+  );
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glow-button:hover::before {
+  opacity: 1;
 }
 
 .heading-font {

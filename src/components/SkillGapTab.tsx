@@ -1,6 +1,8 @@
 import { useStore } from '../store/useStore';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { Award, Star, ListChecks, CheckCircle2, ChevronRight, AlertCircle, Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import ActionImpactHub from './ActionImpactHub';
 
 export default function SkillGapTab() {
   const { activeResult } = useStore();
@@ -52,6 +54,9 @@ export default function SkillGapTab() {
         </div>
 
       </div>
+
+      {/* Strategic Leverage Decisions Engine */}
+      <ActionImpactHub />
 
       {/* 2. Radar Comparison Chart & Heatmap Visual Representation */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -147,41 +152,88 @@ export default function SkillGapTab() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {gapAnalysis.missingSkills.map((item, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-slate-950/40 border border-white/5 flex flex-col justify-between hover:border-indigo-500/15 transition group">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                    item.priority === 'Critical' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'
-                  }`}>
-                    {item.priority} Priority
-                  </span>
-                  <span className="text-[10px] font-semibold text-slate-400">Demand: <span className="text-white">{item.demand}</span></span>
-                </div>
-                <h4 className="font-bold text-white text-sm group-hover:text-cyan-400 transition">{item.name}</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">{item.description}</p>
-              </div>
+          {gapAnalysis.missingSkills.map((item, idx) => {
+            const isCritical = item.priority === 'Critical';
+            
+            return (
+              <motion.div 
+                key={idx} 
+                className={`p-4 rounded-2xl bg-zinc-950/40 border flex flex-col justify-between hover:border-indigo-500/20 transition-all duration-300 group relative overflow-hidden ${
+                  isCritical ? 'border-red-500/20' : 'border-white/5'
+                }`}
+                animate={isCritical ? {
+                  borderColor: [
+                    "rgba(239, 68, 68, 0.12)",
+                    "rgba(239, 68, 68, 0.45)",
+                    "rgba(239, 68, 68, 0.12)"
+                  ],
+                  boxShadow: [
+                    "0 0 4px rgba(239, 68, 68, 0.02)",
+                    "0 0 16px rgba(239, 68, 68, 0.14)",
+                    "0 0 4px rgba(239, 68, 68, 0.02)"
+                  ]
+                } : undefined}
+                transition={isCritical ? {
+                  duration: 2.2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                } : undefined}
+              >
+                {/* Subtle soft red light underlay for critical state */}
+                {isCritical && (
+                  <motion.div 
+                    className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/[0.012] to-red-500/0 pointer-events-none"
+                    animate={{ opacity: [0.35, 1, 0.35] }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
 
-              {/* Resource widget matching item */}
-              <div className="mt-4 pt-3 border-t border-white/5 space-y-2">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400 font-bold">Training Guide:</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold uppercase">{item.resourceType}</span>
+                <div className="space-y-2 relative z-10">
+                  <div className="flex justify-between items-start">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                      isCritical ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'
+                    }`}>
+                      {isCritical && (
+                        <motion.span 
+                          className="inline-block h-1.5 w-1.5 rounded-full bg-red-400 mr-1"
+                          animate={{ opacity: [0.35, 1, 0.35] }}
+                          transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      )}
+                      {item.priority} Priority
+                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-semibold text-slate-400">Demand: <span className="text-white">{item.demand}</span></span>
+                      <span className={`text-[8.5px] font-black uppercase tracking-wider px-1 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-400`} title="Certainty quotient audited under the modern NextMove AI fairness layer.">
+                        Conf: High
+                      </span>
+                    </div>
+                  </div>
+                  <h4 className="font-bold text-white text-sm group-hover:text-cyan-400 transition">{item.name}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{item.description}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-indigo-300 truncate max-w-[150px]">{item.resourceName}</span>
-                  <a 
-                    href={item.resourceLink} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="p-1 rounded bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white transition"
-                  >
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </a>
+
+                {/* Resource widget matching item */}
+                <div className="mt-4 pt-3 border-t border-white/5 space-y-2 relative z-10">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-slate-400 font-bold">Training Guide:</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold uppercase">{item.resourceType}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-indigo-300 truncate max-w-[150px]">{item.resourceName}</span>
+                    <a 
+                      href={item.resourceLink} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="p-1 rounded bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white transition"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 

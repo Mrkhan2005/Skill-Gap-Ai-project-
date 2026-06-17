@@ -60,7 +60,7 @@ const initialChatMessages: ChatMessage[] = [
   {
     id: 'welcome-coaching',
     role: 'assistant',
-    content: "Greetings! I am your SkillGap AI Career Coach, equipped as a World-class Career Consultant, Director of HR, and Workforce Economist. Based on your active profile, ask me anything! For example:\n\n* *'Which skills should I learn next?'*\n* *'Why am I getting rejected by major tech firms?'*\n* *'How do I negotiate a higher base salary?'*\n* *'Should I consider switching my career completely?'*",
+    content: "Greetings! I am NextMove AI, your Career Decision Engine. Traditional platforms just suggest lists of skills to study, but we focus on helping you map out exactly WHAT DECISION TO MAKE NEXT to capture high value.\n\nAsk me anything! For example:\n\n* *'Should I negotiate base salary or sign-on bonus for this role, and how?'*\n* *'Which target industry will yield the highest salary and speed of hiring based on my gaps?'*\n* *'Based on my current readiness index, should I switch careers to Product Manager or stay?'*\n* *'Why could my resume profile be getting rejected at Tier-1, and what critical update should I make today?'*",
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 ];

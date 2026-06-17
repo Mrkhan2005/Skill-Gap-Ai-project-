@@ -11,7 +11,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full glass-panel border-b border-white/10 px-4 md:px-8 py-3">
+    <nav className="sticky top-0 z-40 w-full bg-[#060913]/60 backdrop-blur-xl border-b border-white/[0.08] px-4 md:px-8 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo */}
         <div 
@@ -23,24 +23,24 @@ export default function Navbar() {
 
         {/* Navigation Elements / Core Workspace Sections */}
         {userSession.isAuthed ? (
-          <div className="hidden lg:flex items-center gap-1 text-sm bg-slate-950/40 p-1 rounded-xl border border-white/5">
+          <div className="hidden lg:flex items-center gap-1.5 p-1 bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10">
             {[
               { id: 'overview', label: 'Career Index' },
               { id: 'skills', label: 'Skill Gap Tool' },
               { id: 'roadmap', label: 'AI Roadmap' },
               { id: 'predictions', label: 'Path Forecast' },
+              { id: 'analytics', label: 'Projections' },
               { id: 'coachtab', label: 'AI Coach' },
               { id: 'jobmatches', label: 'Job Matching' },
-              { id: 'prep', label: 'Interview Prep' },
-              { id: 'analytics', label: 'Analytics' },
+              { id: 'prep', label: 'Interview Guide' },
               { id: 'admin', label: 'Admin Hub' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveDashboardTab(tab.id)}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-200 ${
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs tracking-tight transition-all duration-300 ${
                   activeDashboardTab === tab.id
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    ? 'glass-tab-btn-active'
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >

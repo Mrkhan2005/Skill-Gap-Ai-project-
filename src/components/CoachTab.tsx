@@ -1,21 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Send, Sparkles, RefreshCw, User, BrainCircuit, MessageSquare, Trash2, ArrowUpRight } from 'lucide-react';
-import { ChatMessage } from '../types';
+import { ChatMessage, CareerAnalysisResult } from '../types';
 
 export default function CoachTab() {
-  const { chatHistory, addChatMessage, clearChat, selectedTargetRole, userSession } = useStore();
+  const { chatHistory, addChatMessage, clearChat, selectedTargetRole, userSession, activeResult } = useStore();
   const [inputText, setInputText] = useState('');
   const [deepReasoning, setDeepReasoning] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const presets = [
-    { label: 'Why am I getting rejected?', question: 'Review my active resume profile. Why could I be getting rejected by Tier-1 software roles? Point out specific gaps or indexing errors.' },
+    { label: 'Why am I getting rejected?', question: 'Review my active resume profile. Why could I be getting rejected by Tier-1 roles? Point out specific gaps or indexing errors relative to my background.' },
     { label: 'Which skill to learn next?', question: 'Identify the absolute most critical high-demand technology skill I must acquire next based on my profile, and recommend 2 free learning resources.' },
     { label: 'What certifications are worth it?', question: 'Provide 3 globally recognized professional certifications that carry genuine authority for high-paying roles matching my roadmap.' },
-    { label: 'Should I switch careers?', question: 'Evaluate my current skills vector. If I switch to a Product Manager role, which elements carry the highest transferable value?' },
-    { label: 'How do I negotiate salary?', question: 'Give me a specific, professional script and strategy to negotiate a 15% increase in base salary with an engineering director.' }
+    { label: 'Should I switch careers?', question: 'Evaluate my current skills vector. If I switch to a target role, which elements carry the highest transferable value?' },
+    { label: 'How do I negotiate salary?', question: 'Give me a specific, professional script and strategy to negotiate a 15% increase in base salary with an hiring director.' }
   ];
 
   // Self scroll to bottom on logs entry
@@ -52,7 +52,8 @@ export default function CoachTab() {
         body: JSON.stringify({
           messages: contextMessages,
           targetRole: selectedTargetRole,
-          deepThink: deepReasoning
+          deepThink: deepReasoning,
+          activeResult: activeResult // Send profile context to server for deep personalization
         })
       });
 
@@ -72,19 +73,19 @@ export default function CoachTab() {
     } catch (err: any) {
       console.warn('Backend Chat error - calling realistic career simulation fallback:', err.message);
       
-      // Intelligent fallback simulator
-      const simulatedText = simulateResponse(textToSend, selectedTargetRole);
+      // Intelligent fallback simulator using active evaluation outcomes
+      const simulatedText = simulateResponse(textToSend, selectedTargetRole, activeResult);
       
       setTimeout(() => {
         const assistantMsg: ChatMessage = {
           id: `a-${Date.now()}`,
           role: 'assistant',
-          content: `${simulatedText}\n\n*(Analytical alignment sync completed autonomously. To interact with actual live neural networks, connect your GEMINI_API_KEY inside browser Secrets panel).*`,
+          content: `${simulatedText}\n\n*(Personalized alignment sync completed autonomously. To interact with live neural networks, connect your GEMINI_API_KEY inside browser Secrets panel).*`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         addChatMessage(assistantMsg);
         setIsTyping(false);
-      }, 1500);
+      }, 1200);
       return;
     } finally {
       setIsTyping(false);
@@ -237,56 +238,88 @@ export default function CoachTab() {
 }
 
 // Simulated backup responses to guarantee rich interaction when keys are not set up
-function simulateResponse(query: string, coreRole: string) {
+function simulateResponse(query: string, coreRole: string, activeResult: CareerAnalysisResult) {
   const q = query.toLowerCase();
-  
+  const { profile, scores, gapAnalysis, salaryForecast } = activeResult;
+
+  const candidateName = profile.name || 'Candidate';
+  const currentTitle = profile.title || 'Specialist';
+  const experienceYears = profile.experience?.length ? `${profile.experience.length * 2}+` : '3+';
+  const crScore = scores.careerReadiness || 72;
+  const rsScore = scores.resumeStrength || 75;
+  const targetMedian = salaryForecast.currentSalaryEstimate 
+    ? `$${salaryForecast.currentSalaryEstimate.toLocaleString()}` 
+    : '$110,000';
+  const targetPotential = salaryForecast.futureSalaryEstimate 
+    ? `$${salaryForecast.futureSalaryEstimate.toLocaleString()}` 
+    : '$145,000';
+
+  const techGaps = gapAnalysis.missingSkills?.length > 0 
+    ? gapAnalysis.missingSkills.slice(0, 3).map(s => s.name).join(', ') 
+    : 'System integrations and advanced tooling';
+
+  const coreTools = profile.skills?.slice(0, 3).join(', ') || 'Modern workflows';
+
   if (q.includes('reject') || q.includes('why')) {
-    return `### Tier-1 Tech Screening Analysis
-Based on corporate benchmarks, screening failures originate from three core variables:
+    return `### 📊 Custom Vetting & Rejection Diagnosis for **${candidateName}**
+Let's analyze why your current profile as a **${currentTitle}** might spark hesitation in Tier-1 recruiters for the **${coreRole}** trajectory:
 
-1. **Passive Technical Metric Frustration**: Resumes listing responsibilities (e.g., "Maintained active react portal") rather than performance outcomes (e.g., "Optimized React models decreasing bundle size metrics by over 18%") fail ATS algorithms. 
-2. **Missing Flagship Architecture**: For ${coreRole} paths, lacking next-gen credentials or container microservices orchestration represents a primary screen-out factor.
-3. **Keyword Proximity Score**: Corporate parameters require at least an 85% overlap with stated skills profiles.
+1. **Stagnant Task Statements vs. Kinetic Achievements**:
+   Your current resume strength is **${rsScore}%**. Vetting filters reject logs that list duties (e.g., "Responsible for ${coreTools}") instead of *metric-focused business improvements*.
+2. **Flagship Knowledge Friction**:
+   ATS keywords flag your profile for missing immediate competencies: **${techGaps}**.
+3. **Career Readiness Gap (${crScore}% Overall)**:
+   This suggests that while your baseline skills are respectable, you have not explicitly aligned your portfolio with standard corporate system ownership guidelines.
 
-**Recommended corrective action**: Convert all milestones to STAR metrics, highlighting scale outputs.`;
+**My Urgent Advice**: Convert each bullet into a *business success story* showing how you applied your core skills to lower latency, capture growth, or speed up product delivery.`;
   }
 
   if (q.includes('skill') || q.includes('learn')) {
-    return `### High Demand Capabilities
-To excel as a prime ${coreRole} candidate, you must complete these immediate learning objectives:
+    return `### ⚡ High-Demand Capabilities to Learn Next
+As a **${currentTitle}** aiming to bridge into **${coreRole}**, do not scatter your momentum. Target these exact skill gaps:
 
-* **Next.js & Server Components**: Crucial for enterprise scalability and performance requirements.
-* **Distributed State Hydration**: System stability controls.
-* **Testing Automation pipelines (Cypress / Jest)**: Decreasing production incidents levels.
+1. **${techGaps.split(',')[0] || 'Advanced Cloud Warehouses'}** (Primary Target)
+   * **Why**: High frequency keyword found on 74% of live postings.
+   * **Resource**: *Free Interactive Docs & Quick-Start Guides* on GitHub and official resource docs.
+2. **System Design & API Security Protocols**
+   * **Why**: Critical for showing you can build complete standalone services.
+   * **Resource**: *Developer Roadmap Series* and Youtube System Architecture Guides.
 
-**Suggested High-Quality Resources**:
-1. *Official NextJS Academy* (Free documentation paths)
-2. *Kent C. Dodds Testing JavaScript* (Professional workflow blueprints)`;
+**What you should NOT waste time on**: Over-customizing local compiler setups or taking introductory courses for things you already know (like basic HTML or spreadsheets). Use your remaining hours to build real, live-deployed portfolio features!`;
   }
 
   if (q.includes('cert')) {
-    return `### Globally Credential Index
-These professional qualifications carry maximum authority and ROI:
+    return `### 📜 High-Value Certifications Mapped to **${coreRole}**
+To elevate your current **${crScore}% Readiness Index** and bypass corporate recruiters, target these specific certifications:
 
-1. **Google Cloud Certified Professional Cloud Engineer / Data Analyst Architect**: Immediate validator of infrastructure familiarity.
-2. **AWS Certified Associate Suite**: Establishes competence across distributed scaling modules.
-3. **Advanced Scrum Product / Agile Practitioner**: Verifies team orchestration skills.`;
+1. **Cloud Architect Certifications (AWS Solutions Architect or Google Associate Cloud)**
+   * *ROI*: Maximum credibility for showing that you understand modern, elastic deployment infrastructure.
+2. **Professional Scrum Master (PSM I) or Agile Practitioner**
+   * *ROI*: Excellent validator showing you understand high-velocity cross-functional team delivery.
+3. **Specialized Domain Certification (e.g., Snowflake, d3.js, Kubernetes Associate)**
+   * *ROI*: Proves deep technical mastery of complex enterprise systems.`;
   }
 
   if (q.includes('negotiate') || q.includes('salary')) {
-    return `### Salary Negotiation Scripting
-Here is a high-authority negotiation framework to increase compensation alignment:
+    return `### 💰 Strategic Negotiation Protocol
+With your background of **${experienceYears} years of experience**, and pointing your portfolio toward **${coreRole}**, the current market median base salary is **${targetMedian}**, with premium candidates commanding up to **${targetPotential}**.
 
-**Strategic Protocol**: Never declare a first number. Always tie compensation levels back to business goals and independent execution capacities.
+Here is your exact script to capture that premium tier:
 
-**Sample Script**:
-*"I am exceptionally excited about the prospects of joining PixelCraft as a flagship engineer. Based on the custom capabilities, system integrations, and container structures I am preparing, a base compensation level of $115,000 establishes optimal alignment with current market demand thresholds."*`;
+> **Coach's Custom Negotiation Script**
+> *"Thank you for the competitive offer. I am genuinely excited to bring my experience as a **${currentTitle}** to this role. Given my mastery of **${coreTools}** and my immediate focus on resolving critical challenges in **${techGaps}**, I would love to align the base salary to **${targetPotential}** to match current high-impact contribution expectations. Let's discuss how we can structure this to drive a 10x return."*`;
   }
 
-  return `### AI Career Coaching Insights
-Excellent inquiry. Reviewing your profile as a ${coreRole} specialist, I recommend analyzing:
+  return `### 🧠 Personalized AI Coaching Session
+Hello, **${candidateName}**! Based on your active evaluation as a **${currentTitle}** transitioning to **${coreRole}**:
 
-1. **Credential Gaps**: Complete the remaining certifications in your roadmap menu.
-2. **Portfolio Evidence**: Deploy complete system layouts to your GitHub repository and present them inside your active landing profile.
-3. **Networking Strategy**: Target 5 engineering coordinators within high-performing start-ups.`;
+* **Your Current Readiness Score**: **${crScore}%**
+* **Stated Core Competencies**: ${coreTools}
+* **Most Crucial Skill Gaps**: ${techGaps}
+* **Immediate High-Impact Focus**: Shift your energy to building live interactive web or data apps that solve a *real business problem* rather than taking passive quizzes.
+
+Ask me about:
+1. *"Why could my resume get rejected?"*
+2. *"What certifications will give me the highest salary impact?"*
+3. *"Write a custom salary negotiation script for my next interview."*`;
 }

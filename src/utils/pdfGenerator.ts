@@ -520,7 +520,7 @@ export function exportResultToPDF(result: CareerAnalysisResult) {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(148, 163, 184); // Slate 400
-      doc.text('SKILLGAP AI CAREER INTELLIGENCE PLATFORM', 20, 11);
+      doc.text('NEXTMOVE AI CAREER DECISION ENGINE', 20, 11);
       doc.setDrawColor(241, 245, 249);
       doc.setLineWidth(0.3);
       doc.line(20, 13, 190, 13);
@@ -534,11 +534,11 @@ export function exportResultToPDF(result: CareerAnalysisResult) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(140, 150, 170); // slate-450
-    doc.text('Confidential Career Development Report — Empowered by SkillGap AI', 20, 290);
+    doc.text('Confidential Career Development Report — Empowered by NextMove AI', 20, 290);
     doc.text(`Page ${i} of ${totalPages}`, 190, 290, { align: 'right' });
   }
 
   // Trigger download action in client sandbox web frames
   const originalName = profile.name ? profile.name.replace(/\s+/g, '_') : 'Candidate';
-  doc.save(`SkillGap_AI_Career_Roadmap_${originalName}.pdf`);
+  doc.save(`NextMove_AI_Career_Decision_Map_${originalName}.pdf`);
 }

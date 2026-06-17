@@ -24,7 +24,7 @@ export default function AuthModal() {
     setSuccessMsg(`Securely logged in using external ${provider} Credentials.`);
     setTimeout(() => {
       login(
-        provider === 'Google' ? 'executiveemailserves@gmail.com' : 'user@skillgap.ai',
+        provider === 'Google' ? 'executiveemailserves@gmail.com' : 'user@nextmove.ai',
         provider === 'Google' ? 'Executive Admin' : `${provider} Expert`
       );
       handleClose();
@@ -87,7 +87,7 @@ export default function AuthModal() {
             {authModalTab === 'forgot' && 'Restore Access Key'}
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            {authModalTab === 'login' && 'Access your SkillGap career intelligence account'}
+            {authModalTab === 'login' && 'Access your NextMove decision engine account'}
             {authModalTab === 'register' && 'Secure your career roadmap and resume assessment space'}
             {authModalTab === 'forgot' && 'We will coordinate a transition reset sequence'}
           </p>
@@ -178,7 +178,7 @@ export default function AuthModal() {
           <p className="text-xs text-slate-400">
             {authModalTab === 'login' && (
               <>
-                New to SkillGap AI?{' '}
+                New to NextMove AI?{' '}
                 <button 
                   onClick={() => setAuthModalTab('register')}
                   className="text-indigo-400 hover:text-indigo-300 font-bold transition ml-0.5"

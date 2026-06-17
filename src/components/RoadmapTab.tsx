@@ -54,7 +54,12 @@ export default function RoadmapTab() {
         {/* Core Description Left Block */}
         <div className="glass-panel p-6 rounded-3xl space-y-4 lg:col-span-1 flex flex-col justify-between bg-gradient-to-b from-slate-900/60 to-slate-950/40">
           <div className="space-y-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Phase Objective</span>
+            <div className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <span>Phase Objective</span>
+              <span className="px-1.5 py-0.5 rounded border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 text-[8.5px] font-black tracking-normal" title="Confidence rated for standard career execution accuracy.">
+                AI CONF: 92%
+              </span>
+            </div>
             <h3 className="heading-font text-lg font-black text-white">{activeStep.title}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               This block concentrates heavily on constructing foundational blocks, completing certification validations, and optimizing profile scopes or networking channels.

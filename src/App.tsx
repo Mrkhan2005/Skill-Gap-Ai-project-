@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import ResumeUpload from './components/ResumeUpload';
 import Logo from './components/Logo';
+import GlowTracker from './components/GlowTracker';
 
 // Page Tabs Elements
 import OverviewTab from './components/OverviewTab';
@@ -55,69 +56,82 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-12">
-      <Navbar />
-      <AuthModal />
+    <div className="min-h-screen bg-[#060913] text-[#F8FAFC] flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-12 relative overflow-hidden">
+      
+      {/* Animated Liquid Lamp Blobs for the Glass Liquid Theme */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] liquid-blob-1 opacity-65" />
+        <div className="absolute bottom-[10%] right-[-15%] w-[70%] h-[70%] liquid-blob-2 opacity-60" />
+        <div className="absolute top-[35%] left-[25%] w-[50%] h-[50%] liquid-blob-3 opacity-45" />
+      </div>
 
-      {/* Primary Routing Core: Workspace vs Landing Page */}
-      {userSession.isAuthed && activeDashboardTab !== 'landing' ? (
-        
-        // 1. workspace dashboard
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-8 space-y-8 animate-in fade-in duration-500">
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <GlowTracker />
+        <Navbar />
+        <AuthModal />
+
+        {/* Primary Routing Core: Workspace vs Landing Page */}
+        {userSession.isAuthed && activeDashboardTab !== 'landing' ? (
           
-          {/* Workspace Title Greeting node */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 p-6 rounded-3xl border border-white/5 bg-gradient-to-r from-indigo-950/10 via-transparent to-cyan-950/10">
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Secure Career Workspace</span>
-              <h1 className="heading-font text-xl md:text-2xl font-black text-white">
-                Career Intelligence Center
-              </h1>
-              <p className="text-slate-400 text-xs">
-                Active Analysis: <span className="text-indigo-400 font-bold">{activePresetModel === 'Developer' ? 'Software Developer Profile' : 'Data Analyst Profile'}</span>
-              </p>
-            </div>
+          // 1. workspace dashboard
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-8 space-y-8 animate-in fade-in duration-500 relative z-10">
+            
+            {/* Workspace Title Greeting node using premium glass liquid look */}
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5 glass-liquid-panel p-5 md:p-6 border border-white/10 bg-gradient-to-r from-white/[0.02] to-white/[0.04]">
+              <div className="space-y-1 w-full md:w-auto text-left">
+                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">Secure Career Workspace</span>
+                <h1 className="heading-font text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Career Intelligence Center
+                </h1>
+                <p className="text-slate-400 text-xs">
+                  Active Analysis: <span className="text-indigo-400 font-bold">{activePresetModel === 'Developer' ? 'Software Developer Profile' : 'Data Analyst Profile'}</span>
+                </p>
+              </div>
 
-            {/* Switch Core Mock Results */}
-            <div className="flex flex-wrap gap-2 items-center">
-              <button
-                onClick={() => {
-                  setActivePresetModel('Developer');
-                  resetToMockResult('Software Developer');
-                }}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition duration-200 ${
-                  activePresetModel === 'Developer'
-                    ? 'bg-indigo-600/15 border-indigo-500 text-indigo-300'
-                    : 'border-white/5 hover:border-white/10 text-slate-400'
-                }`}
-              >
-                Developer Tech Stack
-              </button>
-              <button
-                onClick={() => {
-                  setActivePresetModel('Analyst');
-                  resetToMockResult('Data Analyst');
-                }}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition duration-200 ${
-                  activePresetModel === 'Analyst'
-                    ? 'bg-cyan-600/15 border-cyan-500 text-cyan-300'
-                    : 'border-white/5 hover:border-white/10 text-slate-400'
-                }`}
-              >
-                Data Analyst Hub
-              </button>
-              
-              <div className="h-6 w-px bg-white/10 hidden sm:block mx-1" />
+              {/* Switch Core Mock Results */}
+              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
+                <div className="flex gap-2 w-full sm:w-auto flex-1 sm:flex-none">
+                  <button
+                    onClick={() => {
+                      setActivePresetModel('Developer');
+                      resetToMockResult('Software Developer');
+                    }}
+                    className={`flex-1 sm:flex-none text-center justify-center px-3 py-1.5 rounded-xl border text-xs font-bold transition duration-200 ${
+                      activePresetModel === 'Developer'
+                        ? 'bg-indigo-600/15 border-indigo-500 text-indigo-300'
+                        : 'border-white/5 hover:border-white/10 text-slate-400'
+                    }`}
+                  >
+                    Developer Tech Stack
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActivePresetModel('Analyst');
+                      resetToMockResult('Data Analyst');
+                    }}
+                    className={`flex-1 sm:flex-none text-center justify-center px-3 py-1.5 rounded-xl border text-xs font-bold transition duration-200 ${
+                      activePresetModel === 'Analyst'
+                        ? 'bg-cyan-600/15 border-cyan-500 text-cyan-300'
+                        : 'border-white/5 hover:border-white/10 text-slate-400'
+                    }`}
+                  >
+                    Data Analyst Hub
+                  </button>
+                </div>
+                
+                <div className="h-6 w-px bg-white/10 hidden sm:block mx-1" />
 
-              <button
-                onClick={() => exportResultToPDF(activeResult)}
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-bold shadow-lg shadow-emerald-900/10 active:scale-[0.98] border border-emerald-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
-                title="Export entire career roadmap & talent metrics report to PDF"
-              >
-                <Download className="h-3.5 w-3.5" />
-                Export PDF Report
-              </button>
+                <button
+                  onClick={() => exportResultToPDF(activeResult)}
+                  className="w-full sm:w-auto justify-center px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-bold shadow-lg shadow-emerald-900/10 active:scale-[0.98] border border-emerald-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Export entire career roadmap & talent metrics report to PDF"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export PDF Report</span>
+                </button>
+              </div>
             </div>
-          </div>
 
           {/* Quick tab ribbon selector for mobile viewports */}
           <div className="flex lg:hidden overflow-x-auto gap-1 border-b border-white/5 pb-2 scrollbar-none">
@@ -159,13 +173,6 @@ export default function App() {
             {activeDashboardTab === 'admin' && <AdminTab />}
           </div>
 
-          {/* Dedicated bottom module for uploading raw document inside active dashboard */}
-          <div className="border-t border-white/5 pt-12">
-            <div className="max-w-3xl mx-auto">
-              <ResumeUpload />
-            </div>
-          </div>
-
         </main>
 
       ) : (
@@ -204,22 +211,24 @@ export default function App() {
               </p>
 
               {/* Action Coordinates CTA with modern glow styles */}
-              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-2 relative z-10">
                 <button
                   onClick={handleLaunchDashboard}
-                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#8B5CF6] text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                  className="glow-button px-8 py-4 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#8B5CF6] text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Analyze My Resume
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  <span className="relative z-10 flex items-center gap-2">
+                    Analyze My Resume
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </span>
                 </button>
                 <button
                   onClick={() => {
                     setActivePresetModel('Developer');
                     setActiveDashboardTab('overview');
                   }}
-                  className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-lg transition-all"
+                  className="glow-button px-8 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-lg transition-all"
                 >
-                  Watch Demo
+                  <span className="relative z-10">Watch Demo</span>
                 </button>
               </div>
 
@@ -354,14 +363,15 @@ export default function App() {
       )}
 
       {/* Footer credits and details information */}
-      <footer className="mt-16 border-t border-white/5 pt-8 px-4 text-center max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 font-medium">
-        <p>© 2026 SkillGap AI • Google Cloud Run Ecosystem.</p>
+      <footer className="mt-16 border-t border-white/5 pt-8 px-4 text-center max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 font-medium relative z-10">
+        <p>© 2026 NextMove AI • Google Cloud Run Ecosystem.</p>
         <div className="flex gap-4">
           <a href="#features" className="hover:text-slate-300 transition">Credentials</a>
           <a href="#demo" className="hover:text-slate-300 transition">Integrations</a>
           <span className="text-indigo-500 font-bold">Secure Core Active</span>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

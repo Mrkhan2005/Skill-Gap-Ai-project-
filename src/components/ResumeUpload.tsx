@@ -37,28 +37,81 @@ export default function ResumeUpload() {
     }
   };
 
-  // Process text-based file contents as raw resume
+  // Process file contents as direct binary payload
   const handleFile = (file: File) => {
     setFeedback({ type: '', msg: '' });
-    const fileType = file.name.split('.').pop()?.toLowerCase();
-    
-    if (fileType !== 'txt' && fileType !== 'docx' && fileType !== 'pdf') {
-      setFeedback({ type: 'error', msg: 'File format not fully supported. Please upload PDF, DOCX, or text (.txt) format, or use paste mode.' });
-      return;
-    }
+    const allowedTypes: Record<string, string> = {
+      'pdf': 'application/pdf',
+      'txt': 'text/plain',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'doc': 'application/msword'
+    };
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const mimeType = allowedTypes[ext] || file.type || 'application/octet-stream';
 
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const text = e.target?.result as string;
-      if (text) {
-        setResumeText(text);
-        setPasteMode(true);
-        setFeedback({ type: 'success', msg: `Successfully parsed ${file.name}. Review resume text and trigger career analysis below.` });
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        const base64Parts = dataUrl.split(';base64,');
+        const base64Data = base64Parts[1] || '';
+        
+        setIsLoadingAnalysis(true);
+        setFeedback({ type: 'success', msg: `Directly uploading and analyzing resume file "${file.name}" with Gemini...` });
+        
+        await triggerDirectAnalysis({
+          mimeType,
+          data: base64Data,
+          name: file.name
+        });
       } else {
-        setFeedback({ type: 'error', msg: 'Could not extract characters from selected file.' });
+        setFeedback({ type: 'error', msg: 'Could not process the uploaded file.' });
       }
     };
-    reader.readAsText(file);
+    reader.readAsDataURL(file);
+  };
+
+  const triggerDirectAnalysis = async (fileObj: { mimeType: string, data: string, name: string }) => {
+    setIsLoadingAnalysis(true);
+    setFeedback({ type: '', msg: '' });
+
+    // Make sure user is logged in
+    if (!userSession.isAuthed) {
+      login('guest@skillgap.ai', 'AI Evaluator');
+    }
+
+    try {
+      const response = await fetch('/api/analyze-resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          fileData: {
+            mimeType: fileObj.mimeType,
+            data: fileObj.data
+          },
+          resumeName: fileObj.name 
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Server processing error');
+      }
+
+      setActiveResult(data);
+      setFeedback({ type: 'success', msg: `Career intelligence completed directly from original file: ${fileObj.name}!` });
+      setActiveDashboardTab('overview');
+    } catch (err: any) {
+      console.warn('Direct file analysis failed:', err);
+      setFeedback({ 
+        type: 'error', 
+        msg: `Failed to analyze resume details directly: ${err.message || 'Server error'}. Please try pasting your text details instead.` 
+      });
+    } finally {
+      setIsLoadingAnalysis(false);
+    }
   };
 
   const triggerAnalysis = async (customText?: string) => {
@@ -131,7 +184,7 @@ export default function ResumeUpload() {
 
   return (
     <div className="w-full max-w-4xl mx-auto py-8">
-      <div className="glass-panel p-6 md:p-8 rounded-3xl relative overflow-hidden shadow-2xl shadow-indigo-600/5">
+      <div className="glass-liquid-panel p-6 md:p-8 relative overflow-hidden shadow-2xl shadow-indigo-600/5">
         
         {/* Decorative Grid */}
         <div className="absolute inset-0 bg-slate-950/20 pointer-events-none">
@@ -228,12 +281,12 @@ export default function ResumeUpload() {
               onDragOver={handleDrag}
               onDragLeave={handleDrag}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-3xl p-8 md:p-12 text-center cursor-pointer transition duration-300 relative group min-h-[220px] flex flex-col items-center justify-center ${
+              onClick={() => !isLoadingAnalysis && fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-3xl p-8 md:p-12 text-center transition duration-300 relative group min-h-[220px] flex flex-col items-center justify-center ${
                 dragActive 
                   ? 'border-indigo-500 bg-indigo-500/5' 
                   : 'border-white/10 hover:border-white/25 bg-slate-900/20 hover:bg-slate-900/40'
-              }`}
+              } ${isLoadingAnalysis ? 'opacity-70 cursor-wait' : 'cursor-pointer'}`}
             >
               <input
                 ref={fileInputRef}
@@ -241,17 +294,32 @@ export default function ResumeUpload() {
                 className="hidden"
                 accept=".txt,.pdf,.docx"
                 onChange={handleFileInputChange}
+                disabled={isLoadingAnalysis}
               />
-              <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-300">
-                <UploadCloud className="h-8 w-8" />
-              </div>
-              <h3 className="font-bold text-white text-base md:text-lg">Drag & Drop Resume</h3>
-              <p className="text-slate-400 text-xs md:text-sm mt-1 max-w-sm">
-                Supports standard PDF, Microsoft Word, or simple TXT profiles.
-              </p>
-              <span className="text-indigo-400 font-bold text-xs mt-4 group-hover:underline">
-                or select from directory
-              </span>
+              {isLoadingAnalysis ? (
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="p-4 rounded-full bg-indigo-500/10 text-indigo-400 animate-spin">
+                    <RefreshCw className="h-8 w-8" />
+                  </div>
+                  <h3 className="font-bold text-white text-base md:text-lg">Analyzing Resume File directly with Gemini...</h3>
+                  <p className="text-slate-400 text-xs md:text-sm max-w-sm">
+                    All dashboard tabs will automatically refresh once the live intelligence profile is compiled.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <UploadCloud className="h-8 w-8" />
+                  </div>
+                  <h3 className="font-bold text-white text-base md:text-lg">Drag & Drop Resume</h3>
+                  <p className="text-slate-400 text-xs md:text-sm mt-1 max-w-sm">
+                    Supports standard PDF, Microsoft Word, or simple TXT profiles.
+                  </p>
+                  <span className="text-indigo-400 font-bold text-xs mt-4 group-hover:underline">
+                    or select from directory
+                  </span>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -264,7 +332,7 @@ export default function ResumeUpload() {
                   placeholder="Alex Rivera&#10;Junior Web Developer&#10;Skills: React, JavaScript, TypeScript, Git&#10;Experience: Frontend Intern at PixelCraft Software designing clean component models..."
                   value={resumeText}
                   onChange={(e) => setResumeText(e.target.value)}
-                  className="w-full bg-slate-900/40 border border-white/10 rounded-2xl py-3 px-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                  className="w-full glass-input rounded-2xl py-3 px-4 text-white text-sm font-mono focus:outline-none"
                 ></textarea>
               </div>
 
