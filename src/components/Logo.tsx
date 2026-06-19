@@ -54,6 +54,7 @@ export function LogoIcon({ className = 'h-8 w-8', glow = true }: { className?: s
           strokeLinecap="round" 
           fill="rgba(6, 182, 212, 0.08)"
           className="hover:fill-[rgba(6,182,212,0.18)] transition-all duration-300"
+          style={{ backgroundColor: '#0133ff', fontWeight: 'bold', fontSize: '18px' }}
         />
         {/* Central vertical divider seam */}
         <path 

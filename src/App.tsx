@@ -5,6 +5,8 @@ import AuthModal from './components/AuthModal';
 import ResumeUpload from './components/ResumeUpload';
 import Logo from './components/Logo';
 import GlowTracker from './components/GlowTracker';
+import InteractiveSandboxPreview from './components/InteractiveSandboxPreview';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Page Tabs Elements
 import OverviewTab from './components/OverviewTab';
@@ -181,155 +183,119 @@ export default function App() {
         <main className="flex-1">
           
           {/* Animated Hero Canvas */}
-          <section className="relative px-4 sm:px-8 py-16 md:py-24 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 overflow-hidden">
+          <section className="relative px-4 sm:px-8 pt-12 pb-24 md:pt-20 md:pb-28 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 overflow-hidden">
             
             {/* Elegant Floating Decorative Particles */}
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-[#4F46E5]/10 rounded-full blur-[80px] pointer-events-none" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#06B6D4]/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute bottom-[10%] right-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[160px] pointer-events-none" />
             <div className="absolute inset-0 ai-glow-bg pointer-events-none" />
 
             {/* Left Content Column */}
-            <div className="flex-1 space-y-6 text-center lg:text-left relative z-10">
+            <div className="flex-1 space-y-8 text-center lg:text-left relative z-10">
+              
               {/* Premium Clean Brand Logo lockup converts user's draft to live pixel-perfect SVG graphics */}
-              <div className="flex flex-col items-center lg:items-start gap-4 pb-2">
-                <div className="p-4 rounded-3xl bg-[#121A2B]/60 border border-white/5 shadow-2xl hover:border-white/10 transition-colors">
+              <div className="flex flex-col items-center lg:items-start gap-4">
+                <div className="p-4 rounded-[2rem] bg-slate-900/60 border border-white/5 shadow-2xl hover:border-white/10 transition-colors">
                   <Logo withSubtitle={true} size="lg" />
                 </div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold text-[10px] uppercase tracking-widest leading-none">
-                  <span className="flex h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                  Corporate Alignment Engine Live
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-550/10 to-cyan-550/10 border border-indigo-500/15 text-indigo-300 font-extrabold text-[10px] uppercase tracking-widest leading-none shadow-inner">
+                  <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                  Decision Telemetry Hub Live
                 </div>
               </div>
               
-              <h1 className="heading-font text-4.5xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white">
-                Stop Guessing Your Career. <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-cyan-400 to-violet-400">Let AI Show You The Way.</span>
+              <h1 className="heading-font text-4.5xl sm:text-5.5xl lg:text-7xl font-black leading-[1.05] tracking-tight text-white">
+                Don't just learn. <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-indigo-400 to-emerald-400">
+                  Decide your Next Move.
+                </span>
               </h1>
 
-              <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium">
-                Upload your resume and receive a personalized career roadmap, skill gap analysis, salary growth prediction, and AI career coaching powered by Gemini models.
+              <p className="text-slate-300 text-sm md:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 font-semibold select-none">
+                Traditional tools flood you with random certification courses saying you CAN learn. 
+                <strong className="text-white"> NextMove AI</strong> analyzes real talent metrics and live job scraper vectors to reveal exactly 
+                <span className="text-indigo-450 text-indigo-300 font-bold"> what key decision to execute next </span> to capture high-value salary leverage, optimal transitions, and fast hiring priority.
               </p>
 
               {/* Action Coordinates CTA with modern glow styles */}
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-2 relative z-10">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleLaunchDashboard}
-                  className="glow-button px-8 py-4 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#8B5CF6] text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                  className="relative overflow-hidden px-10 py-4.5 rounded-2xl bg-gradient-to-r from-indigo-550 via-indigo-600 to-purple-600 text-white font-black text-lg tracking-tight shadow-[0_0_30px_rgba(99,102,241,0.35)] hover:shadow-[0_0_45px_rgba(99,102,241,0.55)] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer border border-indigo-400/20 group/btn"
                 >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Analyze My Resume
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    Analyze My Resume Now
+                    <ArrowRight className="h-5 w-5 group-hover/btn:translate-x-1.5 transition-transform duration-200" />
                   </span>
-                </button>
-                <button
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    setActivePresetModel('Developer');
-                    setActiveDashboardTab('overview');
+                    const el = document.getElementById('playground');
+                    el?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="glow-button px-8 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-lg transition-all"
+                  className="px-8 py-4.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 text-slate-300 hover:text-white font-bold text-lg transition-all"
                 >
-                  <span className="relative z-10">Watch Demo</span>
-                </button>
+                  Explore Interactive Sandbox
+                </motion.button>
               </div>
 
               {/* Verified analyses badge built in design */}
-              <div className="flex items-center justify-center lg:justify-start gap-6 pt-6">
-                <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0B1020] bg-indigo-500 flex items-center justify-center text-[10px] font-bold text-white shadow">JD</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0B1020] bg-cyan-500 flex items-center justify-center text-[10px] font-bold text-white shadow">AS</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0B1020] bg-violet-500 flex items-center justify-center text-[10px] font-bold text-white shadow">MK</div>
+              <div className="flex items-center justify-center lg:justify-start gap-5 pt-3">
+                <div className="flex -space-x-3.5">
+                  <div className="w-10 h-10 rounded-full border-2 border-[#0B1020] bg-indigo-550 flex items-center justify-center text-[10px] font-black tracking-wider text-white select-none">JD</div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#0B1020] bg-cyan-500 flex items-center justify-center text-[10px] font-black tracking-wider text-white select-none">AS</div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#0B1020] bg-violet-500 flex items-center justify-center text-[10px] font-black tracking-wider text-white select-none">MK</div>
                 </div>
-                <div className="text-sm text-slate-500">
-                  <span className="text-white font-semibold">12k+ Professional Analyses</span> completed this month
+                <div className="text-xs text-slate-400 font-semibold text-left">
+                  <span className="text-white font-black block">14,800+ Live Jobs Indexed</span>
+                  Directly mapping credential metrics against actual employer priorities.
                 </div>
               </div>
             </div>
 
             {/* Right Interactive Dashboard preview sandbox */}
-            <div className="flex-1 w-full max-w-lg lg:max-w-none relative z-10">
-              <div className="bg-[#121A2B] p-6 rounded-3xl relative overflow-hidden shadow-2xl shadow-indigo-500/10 border border-white/10 flex flex-col gap-6">
-                
-                {/* Visual Title */}
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 bg-red-500 rounded-full"></span>
-                    <span className="h-2.5 w-2.5 bg-yellow-500 rounded-full"></span>
-                    <span className="h-2.5 w-2.5 bg-green-500 rounded-full"></span>
-                  </div>
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest font-mono">Platform Sandbox Preview</span>
-                </div>
-
-                {/* Dashboard Grid inside Mockups */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Metric 1 */}
-                  <div className="p-4 bg-slate-900/60 rounded-2xl border border-white/5 text-center space-y-1">
-                    <span className="text-[9px] font-bold tracking-wide uppercase text-slate-400 block">Resume Score</span>
-                    <h3 className="heading-font text-3xl font-black text-emerald-400">88%</h3>
-                    <div className="w-16 h-1 bg-emerald-500/20 rounded mx-auto relative overflow-hidden">
-                      <div className="absolute inset-0 bg-emerald-400 w-[88%] rounded"></div>
-                    </div>
-                  </div>
-
-                  {/* Metric 2 */}
-                  <div className="p-4 bg-slate-900/60 rounded-2xl border border-white/5 text-center space-y-1">
-                    <span className="text-[9px] font-bold tracking-wide uppercase text-slate-400 block">Readiness Meter</span>
-                    <h3 className="heading-font text-3xl font-black text-indigo-400">78%</h3>
-                    <div className="w-16 h-1 bg-indigo-500/20 rounded mx-auto relative overflow-hidden">
-                      <div className="absolute inset-0 bg-indigo-500 w-[78%] rounded"></div>
-                    </div>
-                  </div>
-
-                  {/* Chart representation mockup */}
-                  <div className="col-span-2 p-4 bg-slate-900/60 rounded-2xl border border-white/5 space-y-3">
-                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase">
-                      <span>Salary Growth Projection</span>
-                      <span className="text-indigo-400 font-black">+42% Growth</span>
-                    </div>
-                    {/* Simplified glowing mini graph using vectors */}
-                    <div className="h-12 w-full flex items-end justify-between px-1 bg-slate-950/20 rounded-lg pt-4 relative overflow-hidden">
-                      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 20" preserveAspectRatio="none">
-                        <path d="M0,18 Q20,15 40,8 T80,4 T100,1" fill="none" stroke="#06B6D4" strokeWidth="2" strokeDasharray="100" strokeDashoffset="0" className="animate-pulse" />
-                      </svg>
-                      <span className="text-[8px] font-bold text-slate-500">Current</span>
-                      <span className="text-[8px] font-bold text-indigo-400">Completion</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simulated interactive controller elements */}
-                <div className="mt-6 pt-4 border-t border-white/5 flex gap-2">
-                  <button 
-                    onClick={() => setActivePresetModel('Developer')}
-                    className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wide rounded-xl border transition ${
-                      activePresetModel === 'Developer' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300' : 'border-white/5 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Tech Career
-                  </button>
-                  <button 
-                    onClick={() => setActivePresetModel('Analyst')}
-                    className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wide rounded-xl border transition ${
-                      activePresetModel === 'Analyst' ? 'bg-cyan-600/20 border-cyan-500 text-cyan-300' : 'border-white/5 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Analytics Career
-                  </button>
-                </div>
-
-              </div>
+            <div className="flex-1 w-full max-w-lg lg:max-w-none relative z-10" id="playground">
+              <InteractiveSandboxPreview 
+                activePresetModel={activePresetModel} 
+                setActivePresetModel={setActivePresetModel}
+                handleLaunchDashboard={handleLaunchDashboard}
+              />
             </div>
 
           </section>
 
+          {/* Premium stats banner */}
+          <section className="border-y border-white/5 bg-slate-950/20 py-12 px-4 sm:px-8">
+            <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                { stat: '+$24,500', label: 'Average Salary Leverage' },
+                { stat: '14,800+', label: 'Real-time Vacancy Tracks' },
+                { stat: '98.3%', label: 'Decision Match Accuracy' },
+                { stat: '18 Days', label: 'Median Transition Speed' }
+              ].map((item, idx) => (
+                <div key={idx} className="text-center space-y-1">
+                  <h3 className="heading-font text-3xl sm:text-4xl font-black text-white bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight">{item.stat}</h3>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* Core Feature Section Grid */}
-          <section id="features" className="px-4 sm:px-8 py-20 max-w-7xl mx-auto space-y-12">
+          <section id="features" className="px-4 sm:px-8 py-24 max-w-7xl mx-auto space-y-16">
             <div className="text-center space-y-3">
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest block font-serif">Enterprise Utilities</span>
-              <h2 className="heading-font text-3xl md:text-4xl font-black text-white tracking-tight">
-                Complete Career Realignment Engine
+              <span className="text-xs font-black text-indigo-400 uppercase tracking-widest block">System Diagnostics</span>
+              <h2 className="heading-font text-3xl md:text-5xl font-black text-white tracking-tight">
+                Designed for high stakes execution.
               </h2>
-              <p className="text-slate-400 text-xs md:text-sm max-w-lg mx-auto">
-                Discover the 8 advanced metrics built autonomously on robust Gemini models.
+              <p className="text-slate-400 text-xs md:text-sm max-w-lg mx-auto leading-relaxed">
+                Traditional assessment grids leave you guessing. NextMove AI leverages 8 core intelligence dimensions to guide your precise career trajectory.
               </p>
             </div>
 
@@ -339,13 +305,17 @@ export default function App() {
                 return (
                   <div 
                     key={idx} 
-                    className="glass-panel p-6 rounded-3xl space-y-4 hover:border-indigo-505/15 hover:bg-slate-900/40 transition duration-300 group"
+                    className="glass-panel p-7 rounded-[2rem] space-y-4 hover:border-indigo-505/25 hover:bg-slate-900/40 transition duration-300 group relative overflow-hidden"
                   >
-                    <div className="p-3 w-fit rounded-2xl bg-slate-900 border border-white/5 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition duration-300">
-                      <IconComponent className="h-5 w-5" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/[0.01] group-hover:bg-indigo-500/[0.04] blur-2xl rounded-full transition-all duration-300" />
+                    <div className="p-3 w-fit rounded-2xl bg-indigo-500/10 border border-indigo-500/10 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition duration-300">
+                      <IconComponent className="h-5 w-5 animate-pulse" />
                     </div>
-                    <div className="space-y-1.5">
-                      <h4 className="font-bold text-white text-sm group-hover:text-indigo-400 transition">{feat.title}</h4>
+                    <div className="space-y-1.5 text-left">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-extrabold text-white text-sm group-hover:text-indigo-400 transition">{feat.title}</h4>
+                        <span className="text-[8.5px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 rounded font-black uppercase">Active</span>
+                      </div>
                       <p className="text-slate-400 text-xs leading-relaxed font-semibold">{feat.desc}</p>
                     </div>
                   </div>
