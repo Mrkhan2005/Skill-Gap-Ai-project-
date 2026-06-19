@@ -53,14 +53,39 @@ export default function CoachTab() {
           messages: contextMessages,
           targetRole: selectedTargetRole,
           deepThink: deepReasoning,
-          activeResult: activeResult // Send profile context to server for deep personalization
+          activeResult: activeResult
         })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'Generative system error');
+        // Show the actual error message from the server
+        const errorMsg = data.message || data.error || 'AI coach service unavailable';
+        
+        // If API key is missing, use simulated response with a clear note
+        if (data.code === 'api_key_missing') {
+          const simulatedText = simulateResponse(textToSend, selectedTargetRole, activeResult);
+          setTimeout(() => {
+            const assistantMsg: ChatMessage = {
+              id: `a-${Date.now()}`,
+              role: 'assistant',
+              content: `${simulatedText}\n\n*(AI coaching in offline mode — connect your GEMINI_API_KEY in the .env file for live AI responses)*`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            addChatMessage(assistantMsg);
+          }, 800);
+        } else {
+          // For other errors, show the error in chat so the user knows what happened
+          const assistantMsg: ChatMessage = {
+            id: `a-${Date.now()}`,
+            role: 'assistant',
+            content: `⚠️ **Error**: ${errorMsg}\n\nPlease try again or rephrase your question. If the issue persists, check your API configuration.`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          addChatMessage(assistantMsg);
+        }
+        return;
       }
 
       const assistantMsg: ChatMessage = {
@@ -71,22 +96,20 @@ export default function CoachTab() {
       };
       addChatMessage(assistantMsg);
     } catch (err: any) {
-      console.warn('Backend Chat error - calling realistic career simulation fallback:', err.message);
+      console.warn('Backend Chat error:', err.message);
       
-      // Intelligent fallback simulator using active evaluation outcomes
+      // Network error - use simulated response gracefully
       const simulatedText = simulateResponse(textToSend, selectedTargetRole, activeResult);
       
       setTimeout(() => {
         const assistantMsg: ChatMessage = {
           id: `a-${Date.now()}`,
           role: 'assistant',
-          content: `${simulatedText}\n\n*(Personalized alignment sync completed autonomously. To interact with live neural networks, connect your GEMINI_API_KEY inside browser Secrets panel).*`,
+          content: `${simulatedText}\n\n*(Could not reach the AI service. Showing offline career guidance instead.)*`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         addChatMessage(assistantMsg);
-        setIsTyping(false);
-      }, 1200);
-      return;
+      }, 800);
     } finally {
       setIsTyping(false);
     }

@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { UploadCloud, FileText, CheckCircle2, ChevronRight, AlertCircle, RefreshCw, Layers } from 'lucide-react';
 import { mockDataAnalystResult, mockDeveloperResult } from '../store/mockData';
 
 export default function ResumeUpload() {
-  const { setActiveResult, setIsLoadingAnalysis, isLoadingAnalysis, login, userSession, setActiveDashboardTab } = useStore();
+  const { setActiveResult, setIsLoadingAnalysis, isLoadingAnalysis, login, userSession } = useStore();
+  const navigate = useNavigate();
   const [dragActive, setDragActive] = useState(false);
   const [pasteMode, setPasteMode] = useState(false);
   const [resumeText, setResumeText] = useState('');
@@ -102,7 +104,7 @@ export default function ResumeUpload() {
 
       setActiveResult(data);
       setFeedback({ type: 'success', msg: `Career intelligence completed directly from original file: ${fileObj.name}!` });
-      setActiveDashboardTab('overview');
+      navigate('/dashboard/overview');
     } catch (err: any) {
       console.warn('Direct file analysis fell back to simulated intelligence profile:', err);
       
@@ -116,7 +118,7 @@ export default function ResumeUpload() {
 
       setTimeout(() => {
         setActiveResult(fallbackResult);
-        setActiveDashboardTab('overview');
+        navigate('/dashboard/overview');
       }, 1000);
     } finally {
       setIsLoadingAnalysis(false);
@@ -153,7 +155,7 @@ export default function ResumeUpload() {
 
       setActiveResult(data);
       setFeedback({ type: 'success', msg: 'Gemini Agent completed profiling!' });
-      setActiveDashboardTab('overview');
+      navigate('/dashboard/overview');
     } catch (err: any) {
       console.warn('Backend API error - activating safe mock profiles fallback:', err.message);
       
@@ -168,7 +170,7 @@ export default function ResumeUpload() {
 
       setTimeout(() => {
         setActiveResult(fallbackResult);
-        setActiveDashboardTab('overview');
+        navigate('/dashboard/overview');
       }, 1000);
     } finally {
       setIsLoadingAnalysis(false);
@@ -186,7 +188,7 @@ export default function ResumeUpload() {
 
     setTimeout(() => {
       setActiveResult(targetResult);
-      setActiveDashboardTab('overview');
+      navigate('/dashboard/overview');
       setIsLoadingAnalysis(false);
     }, 800);
   };

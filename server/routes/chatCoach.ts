@@ -1,24 +1,49 @@
 import { Router, Request, Response } from 'express';
 import { ThinkingLevel } from '@google/genai';
-import { getGeminiClient } from '../services/geminiClient';
+import { getGeminiClient, classifyGeminiError, createTimeoutSignal } from '../services/geminiClient';
 
 const router = Router();
+const COACH_TIMEOUT_MS = 60_000; // 60 seconds
 
 router.post('/api/chat-coach', async (req: Request, res: Response) => {
   const { messages, targetRole, deepThink, activeResult } = req.body;
 
+  // --- Input Validation ---
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Messages timeline context is required' });
+    return res.status(400).json({
+      error: 'invalid_input',
+      message: 'Messages array is required for the conversation context.',
+      code: 'missing_messages'
+    });
+  }
+
+  if (messages.length === 0) {
+    return res.status(400).json({
+      error: 'invalid_input',
+      message: 'At least one message is required to start a conversation.',
+      code: 'empty_messages'
+    });
+  }
+
+  if (messages.some((m: any) => !m.content || typeof m.content !== 'string')) {
+    return res.status(400).json({
+      error: 'invalid_input',
+      message: 'Each message must have a valid text content field.',
+      code: 'invalid_message_format'
+    });
   }
 
   const ai = getGeminiClient();
 
   if (!ai) {
     return res.status(503).json({
-      error: 'Gemini API not configured on server.',
-      message: 'Consult active profile metrics inside standard dashboard, or set GEMINI_API_KEY in Settings to activate the real-time AI consultant coaching panel.'
+      error: 'api_key_missing',
+      message: 'AI career coaching is not available because no GEMINI_API_KEY is configured. The dashboard will use simulated coaching responses instead.',
+      code: 'api_key_missing'
     });
   }
+
+  const timeoutController = createTimeoutSignal(COACH_TIMEOUT_MS);
 
   try {
     const activeMessages = messages.map((m: any) => ({
@@ -63,9 +88,6 @@ router.post('/api/chat-coach', async (req: Request, res: Response) => {
     const useDeepThink = !!deepThink;
     const activeModel = useDeepThink ? 'gemini-2.0-pro-exp-02-05' : 'gemini-2.0-flash';
 
-    const lastMessage = activeMessages[activeMessages.length - 1];
-    const previousHistory = activeMessages.slice(0, activeMessages.length - 1);
-
     const config: any = {
       systemInstruction,
     };
@@ -84,24 +106,40 @@ router.post('/api/chat-coach', async (req: Request, res: Response) => {
         config
       });
     } catch (modelError: any) {
-      console.warn(`Model ${activeModel} failed to respond or quota exceeded, falling back to gemini-2.0-flash:`, modelError.message);
+      console.warn(`Model ${activeModel} failed, falling back to gemini-2.0-flash:`, modelError.message);
+      
       if (config.thinkingConfig) {
         delete config.thinkingConfig;
       }
-      response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: activeMessages,
-        config
-      });
+      
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.0-flash',
+          contents: activeMessages,
+          config
+        });
+      } catch (fallbackError: any) {
+        const classified = classifyGeminiError(fallbackError);
+        return res.status(classified.statusCode).json({
+          error: classified.errorType,
+          message: classified.userMessage,
+          code: classified.errorType,
+          detail: process.env.NODE_ENV === 'development' ? fallbackError?.message : undefined
+        });
+      }
     }
 
-    const generatedText = response.text || "I was unable to formulate a response. Please rephrase your question.";
+    const generatedText = response?.text || "I was unable to formulate a response. Please rephrase your question.";
     res.json({ content: generatedText });
   } catch (err: any) {
     console.error('Error in chat-coach endpoint:', err);
-    res.status(500).json({
-      error: 'Failed to generate guidance',
-      message: err?.message || 'Unknown generation error.'
+    
+    const classified = classifyGeminiError(err);
+    res.status(classified.statusCode).json({
+      error: classified.errorType,
+      message: classified.userMessage,
+      code: classified.errorType,
+      detail: process.env.NODE_ENV === 'development' ? err?.message : undefined
     });
   }
 });

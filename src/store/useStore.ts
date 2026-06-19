@@ -8,7 +8,6 @@ interface AppStore {
   isLoadingAnalysis: boolean;
   selectedTargetRole: string;
   chatHistory: ChatMessage[];
-  activeDashboardTab: string;
   authModalOpen: boolean;
   authModalTab: 'login' | 'register' | 'forgot';
   
@@ -32,7 +31,6 @@ interface AppStore {
   setSelectedTargetRole: (role: string) => void;
   addChatMessage: (msg: ChatMessage) => void;
   clearChat: () => void;
-  setActiveDashboardTab: (tab: string) => void;
   resetToMockResult: (profileType: 'Software Developer' | 'Data Analyst') => void;
 }
 
@@ -83,7 +81,6 @@ export const useStore = create<AppStore>((set) => {
     isLoadingAnalysis: false,
     selectedTargetRole: 'AI Engineer',
     chatHistory: initialChatMessages,
-    activeDashboardTab: 'overview',
     authModalOpen: false,
     authModalTab: 'login',
     adminStats: defaultAdminStats,
@@ -102,7 +99,7 @@ export const useStore = create<AppStore>((set) => {
 
     logout: () => {
       localStorage.removeItem('skillgap_session');
-      set({ userSession: { email: '', name: '', isAuthed: false }, activeDashboardTab: 'overview' });
+      set({ userSession: { email: '', name: '', isAuthed: false } });
     },
 
     setAuthModalOpen: (open) => set({ authModalOpen: open }),
@@ -116,8 +113,6 @@ export const useStore = create<AppStore>((set) => {
     })),
 
     clearChat: () => set({ chatHistory: initialChatMessages }),
-    setActiveDashboardTab: (tab) => set({ activeDashboardTab: tab }),
-
     resetToMockResult: (profileType) => {
       if (profileType === 'Software Developer') {
         set({ activeResult: mockDeveloperResult, chatHistory: initialChatMessages, selectedTargetRole: 'AI Engineer' });
