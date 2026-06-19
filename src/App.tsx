@@ -9,16 +9,17 @@ import InteractiveSandboxPreview from './components/InteractiveSandboxPreview';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Page Tabs Elements
-import OverviewTab from './components/OverviewTab';
-import SkillGapTab from './components/SkillGapTab';
-import RoadmapTab from './components/RoadmapTab';
-import PathPredictorTab from './components/PathPredictorTab';
-import SalaryTab from './components/SalaryTab';
-import CoachTab from './components/CoachTab';
-import JobMatchingTab from './components/JobMatchingTab';
-import InterviewTab from './components/InterviewTab';
-import AnalyticsTab from './components/AnalyticsTab';
-import AdminTab from './components/AdminTab';
+import { lazy, Suspense } from 'react';
+const OverviewTab = lazy(() => import('./components/OverviewTab'));
+const SkillGapTab = lazy(() => import('./components/SkillGapTab'));
+const RoadmapTab = lazy(() => import('./components/RoadmapTab'));
+const PathPredictorTab = lazy(() => import('./components/PathPredictorTab'));
+const SalaryTab = lazy(() => import('./components/SalaryTab'));
+const CoachTab = lazy(() => import('./components/CoachTab'));
+const JobMatchingTab = lazy(() => import('./components/JobMatchingTab'));
+const InterviewTab = lazy(() => import('./components/InterviewTab'));
+const AnalyticsTab = lazy(() => import('./components/AnalyticsTab'));
+const AdminTab = lazy(() => import('./components/AdminTab'));
 
 // Styling Icons
 import { 

@@ -498,7 +498,7 @@ app.post('/api/chat-coach', async (req, res) => {
 
     // Apply high thinking settings for pro-preview if requested
     const useDeepThink = !!deepThink;
-    const activeModel = useDeepThink ? 'gemini-3.1-pro-preview' : 'gemini-3.5-flash';
+    const activeModel = useDeepThink ? 'gemini-2.0-pro-exp-02-05' : 'gemini-2.0-flash';
 
     const lastMessage = activeMessages[activeMessages.length - 1];
     const previousHistory = activeMessages.slice(0, activeMessages.length - 1);
@@ -523,13 +523,13 @@ app.post('/api/chat-coach', async (req, res) => {
         config
       });
     } catch (modelError: any) {
-      console.warn(`Model ${activeModel} failed to respond or quota exceeded, falling back to gemini-3.5-flash:`, modelError.message);
-      // Clean up thinkingConfig as gemini-3.5-flash does not support high thinking config parameters
+      console.warn(`Model ${activeModel} failed to respond or quota exceeded, falling back to gemini-2.0-flash:`, modelError.message);
+      // Clean up thinkingConfig as gemini-2.0-flash does not support high thinking config parameters
       if (config.thinkingConfig) {
         delete config.thinkingConfig;
       }
       response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: 'gemini-2.0-flash',
         contents: activeMessages,
         config
       });
