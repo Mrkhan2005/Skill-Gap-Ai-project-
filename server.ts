@@ -390,19 +390,19 @@ app.post('/api/analyze-resume', async (req, res) => {
 
     let response;
     try {
-      console.log('Sending parsing request to Gemini highest model (gemini-2.0-pro-exp-02-05)...');
+      console.log('Sending parsing request to Gemini high-speed model (gemini-3.5-flash) for instant resume analysis...');
       response = await ai.models.generateContent({
-        model: 'gemini-2.0-pro-exp-02-05',
+        model: 'gemini-3.5-flash',
         contents: contents,
         config: {
           responseMimeType: 'application/json',
           responseSchema: resumeSchema,
         }
       });
-    } catch (proError: any) {
-      console.warn('gemini-2.0-pro-exp-02-05 failed or not accessible, falling back to gemini-2.0-flash:', proError.message);
+    } catch (flashError: any) {
+      console.warn('gemini-3.5-flash failed or not accessible, falling back to gemini-3.1-pro-preview:', flashError.message);
       response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: contents,
         config: {
           responseMimeType: 'application/json',
