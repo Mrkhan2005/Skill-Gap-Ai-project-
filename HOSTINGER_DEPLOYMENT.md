@@ -18,10 +18,10 @@ To make the AI-powered features like resume parsing and career coaching work on 
    Open the `.env` file and insert your credentials. For example:
    ```env
    # Your AI Studio API Key (Required for resume parsing & chat coaching)
-   GEMINI_API_KEY="AIzaSyYourActualAPIKeyHere_XYZ123"
+   GEMINI_API_KEY="AQ.Ab8RN6Jcs_odvy5hVaAfbLPqwNj_KkL_wh71fMYK0dZMy2uq-g"
 
    # Your official custom domain in Hostinger details
-   APP_URL="https://yourdomain.com"
+   APP_URL="https://nextmoveai.telentup.io/"
 
    # Set server execution environment to production
    NODE_ENV="production"
