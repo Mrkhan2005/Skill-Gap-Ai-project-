@@ -1,6 +1,8 @@
 import { create } from 'zustand';
-import { CareerAnalysisResult, ChatMessage, UserSession } from '../types';
-import { mockDeveloperResult, mockDataAnalystResult } from './mockData';
+import { CareerAnalysisResult, ChatMessage, UserSession } from '../types.ts';
+import { mockDeveloperResult, mockDataAnalystResult } from './mockData.ts';
+import { auth as fbAuth, googleAuthProvider, signInWithPopup } from '../lib/firebase.ts';
+import { signOut } from 'firebase/auth';
 
 interface AppStore {
   userSession: UserSession;
@@ -8,6 +10,7 @@ interface AppStore {
   isLoadingAnalysis: boolean;
   selectedTargetRole: string;
   chatHistory: ChatMessage[];
+  activeDashboardTab: string;
   authModalOpen: boolean;
   authModalTab: 'login' | 'register' | 'forgot';
   
@@ -23,6 +26,7 @@ interface AppStore {
   // Actions
   login: (email: string, name: string) => void;
   register: (email: string, name: string) => void;
+  loginWithGoogle: () => Promise<void>;
   logout: () => void;
   setAuthModalOpen: (open: boolean) => void;
   setAuthModalTab: (tab: 'login' | 'register' | 'forgot') => void;
@@ -30,7 +34,9 @@ interface AppStore {
   setIsLoadingAnalysis: (loading: boolean) => void;
   setSelectedTargetRole: (role: string) => void;
   addChatMessage: (msg: ChatMessage) => void;
+  setChatHistory: (history: ChatMessage[]) => void;
   clearChat: () => void;
+  setActiveDashboardTab: (tab: string) => void;
   resetToMockResult: (profileType: 'Software Developer' | 'Data Analyst') => void;
 }
 
@@ -81,6 +87,7 @@ export const useStore = create<AppStore>((set) => {
     isLoadingAnalysis: false,
     selectedTargetRole: 'AI Engineer',
     chatHistory: initialChatMessages,
+    activeDashboardTab: 'overview',
     authModalOpen: false,
     authModalTab: 'login',
     adminStats: defaultAdminStats,
@@ -97,9 +104,46 @@ export const useStore = create<AppStore>((set) => {
       set({ userSession: session, authModalOpen: false });
     },
 
+    loginWithGoogle: async () => {
+      try {
+        const result = await signInWithPopup(fbAuth, googleAuthProvider);
+        const user = result.user;
+        const token = await user.getIdToken();
+        
+        // Sync with Cloud SQL backend
+        const syncResponse = await fetch('/api/sync-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name: user.displayName || 'Google Specialist' })
+        });
+
+        if (!syncResponse.ok) {
+          throw new Error('Database sync failed or table unreachable');
+        }
+
+        const session: UserSession = {
+          email: user.email || '',
+          name: user.displayName || 'Google Specialist',
+          isAuthed: true,
+          token,
+          photoURL: user.photoURL || undefined
+        };
+
+        localStorage.setItem('skillgap_session', JSON.stringify(session));
+        set({ userSession: session, authModalOpen: false });
+      } catch (err) {
+        console.error('Google Sign In authentication flow failed:', err);
+        throw err;
+      }
+    },
+
     logout: () => {
+      signOut(fbAuth).catch((err) => console.warn('Firebase signout error:', err));
       localStorage.removeItem('skillgap_session');
-      set({ userSession: { email: '', name: '', isAuthed: false } });
+      set({ userSession: { email: '', name: '', isAuthed: false }, activeDashboardTab: 'overview' });
     },
 
     setAuthModalOpen: (open) => set({ authModalOpen: open }),
@@ -112,7 +156,11 @@ export const useStore = create<AppStore>((set) => {
       chatHistory: [...state.chatHistory, msg] 
     })),
 
+    setChatHistory: (history) => set({ chatHistory: history }),
+
     clearChat: () => set({ chatHistory: initialChatMessages }),
+    setActiveDashboardTab: (tab) => set({ activeDashboardTab: tab }),
+
     resetToMockResult: (profileType) => {
       if (profileType === 'Software Developer') {
         set({ activeResult: mockDeveloperResult, chatHistory: initialChatMessages, selectedTargetRole: 'AI Engineer' });

@@ -2,5 +2,5 @@
   "name": "NextMove AI",
   "description": "NextMove AI is a highly tailored career decision engine designed to help candidates bypass passive learning routes and instantly determine what strategic career decision to execute next.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_DEEPSEEK_API"]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

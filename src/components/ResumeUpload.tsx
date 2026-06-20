@@ -1,12 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { UploadCloud, FileText, CheckCircle2, ChevronRight, AlertCircle, RefreshCw, Layers } from 'lucide-react';
 import { mockDataAnalystResult, mockDeveloperResult } from '../store/mockData';
 
 export default function ResumeUpload() {
-  const { setActiveResult, setIsLoadingAnalysis, isLoadingAnalysis, login, userSession } = useStore();
-  const navigate = useNavigate();
+  const { setActiveResult, setIsLoadingAnalysis, isLoadingAnalysis, login, userSession, setActiveDashboardTab } = useStore();
   const [dragActive, setDragActive] = useState(false);
   const [pasteMode, setPasteMode] = useState(false);
   const [resumeText, setResumeText] = useState('');
@@ -60,7 +58,7 @@ export default function ResumeUpload() {
         const base64Data = base64Parts[1] || '';
         
         setIsLoadingAnalysis(true);
-        setFeedback({ type: 'success', msg: `Directly uploading and analyzing resume file "${file.name}" with DeepSeek AI...` });
+        setFeedback({ type: 'success', msg: `Directly uploading and analyzing resume file "${file.name}" with Gemini...` });
         
         await triggerDirectAnalysis({
           mimeType,
@@ -86,7 +84,10 @@ export default function ResumeUpload() {
     try {
       const response = await fetch('/api/analyze-resume', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(userSession.token ? { 'Authorization': `Bearer ${userSession.token}` } : {})
+        },
         body: JSON.stringify({ 
           fileData: {
             mimeType: fileObj.mimeType,
@@ -103,8 +104,28 @@ export default function ResumeUpload() {
       }
 
       setActiveResult(data);
+
+      // Persist analysis to Cloud SQL if user is authenticated with Firebase
+      if (userSession.token) {
+        try {
+          await fetch('/api/save-analysis', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userSession.token}`
+            },
+            body: JSON.stringify({
+              fileName: fileObj.name || 'Resume_Direct_Upload',
+              analysisResult: data
+            })
+          });
+        } catch (saveErr) {
+          console.warn('Failed to persist resume analysis in Cloud SQL:', saveErr);
+        }
+      }
+
       setFeedback({ type: 'success', msg: `Career intelligence completed directly from original file: ${fileObj.name}!` });
-      navigate('/dashboard/overview');
+      setActiveDashboardTab('overview');
     } catch (err: any) {
       console.warn('Direct file analysis fell back to simulated intelligence profile:', err);
       
@@ -113,13 +134,13 @@ export default function ResumeUpload() {
 
       setFeedback({ 
         type: 'success', 
-        msg: `Processed with Career Intelligence offline matching for "${fileObj.name}"! (To parse live resume data on cloud servers, configure your DEEPSEEK_API_KEY in secrets).` 
+        msg: `Processed with Career Intelligence offline matching for "${fileObj.name}"! (To parse live resume data on cloud servers, configure your GEMINI_API_KEY in secrets).` 
       });
 
       setTimeout(() => {
         setActiveResult(fallbackResult);
-        navigate('/dashboard/overview');
-      }, 1000);
+        setActiveDashboardTab('overview');
+      }, 200);
     } finally {
       setIsLoadingAnalysis(false);
     }
@@ -143,7 +164,10 @@ export default function ResumeUpload() {
     try {
       const response = await fetch('/api/analyze-resume', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(userSession.token ? { 'Authorization': `Bearer ${userSession.token}` } : {})
+        },
         body: JSON.stringify({ resumeText: textToAnalyze, resumeName: 'Uploaded_Resume.txt' })
       });
 
@@ -154,8 +178,28 @@ export default function ResumeUpload() {
       }
 
       setActiveResult(data);
-      setFeedback({ type: 'success', msg: 'DeepSeek AI completed profiling!' });
-      navigate('/dashboard/overview');
+
+      // Persist analysis to Cloud SQL if user is authenticated with Firebase
+      if (userSession.token) {
+        try {
+          await fetch('/api/save-analysis', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userSession.token}`
+            },
+            body: JSON.stringify({
+              fileName: 'Uploaded_Resume.txt',
+              analysisResult: data
+            })
+          });
+        } catch (saveErr) {
+          console.warn('Failed to persist text resume analysis in Cloud SQL:', saveErr);
+        }
+      }
+
+      setFeedback({ type: 'success', msg: 'Gemini Agent completed profiling!' });
+      setActiveDashboardTab('overview');
     } catch (err: any) {
       console.warn('Backend API error - activating safe mock profiles fallback:', err.message);
       
@@ -165,13 +209,13 @@ export default function ResumeUpload() {
       
       setFeedback({ 
         type: 'success', 
-        msg: 'Processed with Career Intelligence local matching! (To parse live resumes on Cloud servers, ensure your DEEPSEEK_API_KEY is configured in Secrets).' 
+        msg: 'Processed with Career Intelligence local matching! (To parse live resumes on Cloud servers, ensure your GEMINI_API_KEY is configured in Secrets).' 
       });
 
       setTimeout(() => {
         setActiveResult(fallbackResult);
-        navigate('/dashboard/overview');
-      }, 1000);
+        setActiveDashboardTab('overview');
+      }, 200);
     } finally {
       setIsLoadingAnalysis(false);
     }
@@ -188,9 +232,9 @@ export default function ResumeUpload() {
 
     setTimeout(() => {
       setActiveResult(targetResult);
-      navigate('/dashboard/overview');
+      setActiveDashboardTab('overview');
       setIsLoadingAnalysis(false);
-    }, 800);
+    }, 150);
   };
 
   return (
@@ -312,7 +356,7 @@ export default function ResumeUpload() {
                   <div className="p-4 rounded-full bg-indigo-500/10 text-indigo-400 animate-spin">
                     <RefreshCw className="h-8 w-8" />
                   </div>
-                  <h3 className="font-bold text-white text-base md:text-lg">Analyzing Resume File directly with DeepSeek AI...</h3>
+                  <h3 className="font-bold text-white text-base md:text-lg">Analyzing Resume File directly with Gemini...</h3>
                   <p className="text-slate-400 text-xs md:text-sm max-w-sm">
                     All dashboard tabs will automatically refresh once the live intelligence profile is compiled.
                   </p>
@@ -356,10 +400,10 @@ export default function ResumeUpload() {
                   {isLoadingAnalysis ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      DeepSeek Career Architect Syncing...
+                      Gemini Career Architect Syncing...
                     </>
                   ) : (
-                    'Analyze Resume Content with DeepSeek AI'
+                    'Analyze Resume Content with Gemini'
                   )}
                 </button>
               </div>

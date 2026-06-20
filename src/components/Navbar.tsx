@@ -1,20 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { Sparkles, Terminal, LogOut, User, Activity, ShieldAlert, Menu, X } from 'lucide-react';
+import { Sparkles, Terminal, LogOut, User, Activity, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from './Logo';
 
 export default function Navbar() {
-  const { userSession, logout, setAuthModalOpen, setAuthModalTab } = useStore();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { userSession, logout, setAuthModalOpen, setAuthModalTab, activeDashboardTab, setActiveDashboardTab } = useStore();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const currentTab = location.pathname.startsWith('/dashboard')
-    ? location.pathname.split('/').pop() || 'overview'
-    : '';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,21 +42,11 @@ export default function Navbar() {
 
         {/* Brand Logo */}
         <div 
-          onClick={() => navigate(userSession.isAuthed ? '/dashboard/overview' : '/')} 
+          onClick={() => setActiveDashboardTab(userSession.isAuthed ? 'overview' : 'landing')} 
           className="cursor-pointer group flex items-center shrink-0 transition-transform active:scale-95"
         >
           <Logo size="md" />
         </div>
-
-        {/* Mobile Menu Toggle */}
-        {userSession.isAuthed && (
-          <button
-            className="lg:hidden p-2 text-slate-400 hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        )}
 
         {/* Navigation Elements / Core Workspace Sections */}
         {userSession.isAuthed ? (
@@ -82,14 +64,14 @@ export default function Navbar() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => navigate(`/dashboard/${tab.id}`)}
+                onClick={() => setActiveDashboardTab(tab.id)}
                 className={`px-3 py-1.5 rounded-xl font-bold text-xs tracking-tight transition-colors duration-200 relative ${
-                  currentTab === tab.id
+                  activeDashboardTab === tab.id
                     ? 'text-white'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {currentTab === tab.id && (
+                {activeDashboardTab === tab.id && (
                   <motion.div
                     layoutId="activeNavTab"
                     className="absolute inset-0 bg-indigo-650/30 border border-indigo-500/30 rounded-xl z-[-1] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]"
@@ -156,45 +138,6 @@ export default function Navbar() {
           )}
         </div>
       </motion.nav>
-
-      {/* Mobile Dropdown Menu */}
-      <AnimatePresence>
-        {userSession.isAuthed && mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col gap-2 shadow-2xl z-40"
-          >
-            {[
-              { id: 'overview', label: 'Career Index' },
-              { id: 'skills', label: 'Skill Gap Tool' },
-              { id: 'roadmap', label: 'AI Roadmap' },
-              { id: 'predictions', label: 'Path Forecast' },
-              { id: 'analytics', label: 'Projections' },
-              { id: 'coachtab', label: 'AI Coach' },
-              { id: 'jobmatches', label: 'Job Matching' },
-              { id: 'prep', label: 'Interview Guide' },
-              { id: 'admin', label: 'Admin Hub' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  navigate(`/dashboard/${tab.id}`);
-                  setMobileMenuOpen(false);
-                }}
-                className={`p-3 rounded-xl font-bold text-sm tracking-tight transition-colors duration-200 text-left ${
-                  currentTab === tab.id
-                    ? 'bg-indigo-600/20 text-white border border-indigo-500/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

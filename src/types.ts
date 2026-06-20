@@ -156,4 +156,6 @@ export interface UserSession {
   email: string;
   name: string;
   isAuthed: boolean;
+  token?: string;
+  photoURL?: string;
 }
