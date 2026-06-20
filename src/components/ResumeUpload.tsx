@@ -60,7 +60,7 @@ export default function ResumeUpload() {
         const base64Data = base64Parts[1] || '';
         
         setIsLoadingAnalysis(true);
-        setFeedback({ type: 'success', msg: `Directly uploading and analyzing resume file "${file.name}" with Gemini...` });
+        setFeedback({ type: 'success', msg: `Directly uploading and analyzing resume file "${file.name}" with DeepSeek AI...` });
         
         await triggerDirectAnalysis({
           mimeType,
@@ -113,7 +113,7 @@ export default function ResumeUpload() {
 
       setFeedback({ 
         type: 'success', 
-        msg: `Processed with Career Intelligence offline matching for "${fileObj.name}"! (To parse live resume data on cloud servers, configure your GEMINI_API_KEY in secrets).` 
+        msg: `Processed with Career Intelligence offline matching for "${fileObj.name}"! (To parse live resume data on cloud servers, configure your DEEPSEEK_API_KEY in secrets).` 
       });
 
       setTimeout(() => {
@@ -154,7 +154,7 @@ export default function ResumeUpload() {
       }
 
       setActiveResult(data);
-      setFeedback({ type: 'success', msg: 'Gemini Agent completed profiling!' });
+      setFeedback({ type: 'success', msg: 'DeepSeek AI completed profiling!' });
       navigate('/dashboard/overview');
     } catch (err: any) {
       console.warn('Backend API error - activating safe mock profiles fallback:', err.message);
@@ -165,7 +165,7 @@ export default function ResumeUpload() {
       
       setFeedback({ 
         type: 'success', 
-        msg: 'Processed with Career Intelligence local matching! (To parse live resumes on Cloud servers, ensure your GEMINI_API_KEY is configured in Secrets).' 
+        msg: 'Processed with Career Intelligence local matching! (To parse live resumes on Cloud servers, ensure your DEEPSEEK_API_KEY is configured in Secrets).' 
       });
 
       setTimeout(() => {
@@ -312,7 +312,7 @@ export default function ResumeUpload() {
                   <div className="p-4 rounded-full bg-indigo-500/10 text-indigo-400 animate-spin">
                     <RefreshCw className="h-8 w-8" />
                   </div>
-                  <h3 className="font-bold text-white text-base md:text-lg">Analyzing Resume File directly with Gemini...</h3>
+                  <h3 className="font-bold text-white text-base md:text-lg">Analyzing Resume File directly with DeepSeek AI...</h3>
                   <p className="text-slate-400 text-xs md:text-sm max-w-sm">
                     All dashboard tabs will automatically refresh once the live intelligence profile is compiled.
                   </p>
@@ -356,10 +356,10 @@ export default function ResumeUpload() {
                   {isLoadingAnalysis ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      Gemini Career Architect Syncing...
+                      DeepSeek Career Architect Syncing...
                     </>
                   ) : (
-                    'Analyze Resume Content with Gemini'
+                    'Analyze Resume Content with DeepSeek AI'
                   )}
                 </button>
               </div>

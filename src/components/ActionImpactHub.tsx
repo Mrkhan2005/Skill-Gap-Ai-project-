@@ -121,7 +121,7 @@ export default function ActionImpactHub() {
       lineTheme: 'bg-cyan-500',
       bullets: isDeveloper ? [
         {
-          heading: 'Pioneering Dynamic AI Agent & Gemini API SDK Integrations',
+          heading: 'Pioneering Dynamic AI Agent & DeepSeek AI SDK Integrations',
           detail: 'Full-stack software developers who can orchestrate live server processes with structured AI APIs command an immediate 20-30% compensation premium. Showcase actual generative chat, search-grounding, or structured tool calling.',
           timeframe: 'Salary Impact: +$22k - $35k/yr',
           leverageFactor: 'Elite Market Tier'

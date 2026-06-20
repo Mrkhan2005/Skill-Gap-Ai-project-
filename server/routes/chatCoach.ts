@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { ThinkingLevel } from '@google/genai';
-import { getGeminiClient, classifyGeminiError, createTimeoutSignal } from '../services/geminiClient';
+import { getDeepSeekClient, classifyDeepSeekError, DEEPSEEK_MODELS } from '../services/deepseekClient';
 
 const router = Router();
 const COACH_TIMEOUT_MS = 60_000; // 60 seconds
@@ -33,23 +32,21 @@ router.post('/api/chat-coach', async (req: Request, res: Response) => {
     });
   }
 
-  const ai = getGeminiClient();
+  const ai = getDeepSeekClient();
 
   if (!ai) {
     return res.status(503).json({
       error: 'api_key_missing',
-      message: 'AI career coaching is not available because no GEMINI_API_KEY is configured. The dashboard will use simulated coaching responses instead.',
+      message: 'AI career coaching is not available because no DEEPSEEK_API_KEY is configured. The dashboard will use simulated coaching responses instead.',
       code: 'api_key_missing'
     });
   }
 
-  const timeoutController = createTimeoutSignal(COACH_TIMEOUT_MS);
-
   try {
     const activeMessages = messages.map((m: any) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }]
-    }));
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content
+    } as { role: 'user' | 'assistant'; content: string }));
 
     let profileContext = '';
     if (activeResult && activeResult.profile) {
@@ -71,6 +68,9 @@ router.post('/api/chat-coach', async (req: Request, res: Response) => {
       `;
     }
 
+    const useDeepThink = !!deepThink;
+    const activeModel = useDeepThink ? DEEPSEEK_MODELS.fallback : DEEPSEEK_MODELS.primary;
+
     const systemInstruction = `
       You are NextMove AI, operating as a World-class Career Decision Engine, Career Consultant, Academic Strategist, Talent Director, Workforce Economist, and Learning Advisor.
       Your goal is to guide clients to make correct high-leverage decisions about choosing between roles, negotiating base salary, target industry pivots, and prioritizing real action execution over endless learning lists.
@@ -85,41 +85,39 @@ router.post('/api/chat-coach', async (req: Request, res: Response) => {
       - Focus heavily on decision points: "Should they pivot?" "What is their next move?" "How should they decide?"
     `;
 
-    const useDeepThink = !!deepThink;
-    const activeModel = useDeepThink ? 'gemini-2.0-pro-exp-02-05' : 'gemini-2.0-flash';
-
-    const config: any = {
-      systemInstruction,
-    };
-
-    if (useDeepThink) {
-      config.thinkingConfig = {
-        thinkingLevel: ThinkingLevel.HIGH
-      };
-    }
-
-    let response;
+    let completion;
     try {
-      response = await ai.models.generateContent({
+      completion = await ai.chat.completions.create({
         model: activeModel,
-        contents: activeMessages,
-        config
-      });
+        messages: [
+          {
+            role: 'system',
+            content: systemInstruction
+          },
+          ...activeMessages
+        ],
+        temperature: 0.3,
+        max_tokens: 4096,
+      }, { timeout: COACH_TIMEOUT_MS });
     } catch (modelError: any) {
-      console.warn(`Model ${activeModel} failed, falling back to gemini-2.0-flash:`, modelError.message);
-      
-      if (config.thinkingConfig) {
-        delete config.thinkingConfig;
-      }
+      const fallbackModel = activeModel === DEEPSEEK_MODELS.fallback ? DEEPSEEK_MODELS.primary : DEEPSEEK_MODELS.fallback;
+      console.warn(`Model ${activeModel} failed, falling back to ${fallbackModel}:`, modelError.message);
       
       try {
-        response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: activeMessages,
-          config
-        });
+        completion = await ai.chat.completions.create({
+          model: fallbackModel,
+          messages: [
+            {
+              role: 'system',
+              content: systemInstruction
+            },
+            ...activeMessages
+          ],
+          temperature: 0.3,
+          max_tokens: 4096,
+        }, { timeout: COACH_TIMEOUT_MS });
       } catch (fallbackError: any) {
-        const classified = classifyGeminiError(fallbackError);
+        const classified = classifyDeepSeekError(fallbackError);
         return res.status(classified.statusCode).json({
           error: classified.errorType,
           message: classified.userMessage,
@@ -129,12 +127,12 @@ router.post('/api/chat-coach', async (req: Request, res: Response) => {
       }
     }
 
-    const generatedText = response?.text || "I was unable to formulate a response. Please rephrase your question.";
+    const generatedText = completion?.choices?.[0]?.message?.content || "I was unable to formulate a response. Please rephrase your question.";
     res.json({ content: generatedText });
   } catch (err: any) {
     console.error('Error in chat-coach endpoint:', err);
     
-    const classified = classifyGeminiError(err);
+    const classified = classifyDeepSeekError(err);
     res.status(classified.statusCode).json({
       error: classified.errorType,
       message: classified.userMessage,

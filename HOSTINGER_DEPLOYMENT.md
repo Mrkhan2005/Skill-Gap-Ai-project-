@@ -1,6 +1,6 @@
 # NextMove AI — Hostinger Deployment Guide
 
-This guide will help you easily set up, configure, and deploy your **NextMove AI** Full-Stack (React + Node + Express + Gemini AI) application on **Hostinger**.
+This guide will help you easily set up, configure, and deploy your **NextMove AI** Full-Stack (React + Node + Express + DeepSeek AI) application on **Hostinger**.
 
 ---
 
@@ -8,8 +8,8 @@ This guide will help you easily set up, configure, and deploy your **NextMove AI
 
 To make the AI-powered features like resume parsing and career coaching work on Hostinger, you must supply your dynamic API key.
 
-1. **Get your Gemini API Key:**
-   Make sure you have an API key generated from [Google AI Studio](https://aistudio.google.com/).
+1. **Get your DeepSeek API Key:**
+   Make sure you have an API key generated from [DeepSeek Platform](https://platform.deepseek.com/api_keys).
 
 2. **Create the Environment File:**
    In the root directory of your project on your Hostinger server (or in your deployment folder), create a file named exactly `.env`.
@@ -17,8 +17,8 @@ To make the AI-powered features like resume parsing and career coaching work on 
 3. **Populate the `.env` File:**
    Open the `.env` file and insert your credentials. For example:
    ```env
-   # Your AI Studio API Key (Required for resume parsing & chat coaching)
-   GEMINI_API_KEY="AIzaSyYourActualAPIKeyHere_XYZ123"
+   # Your DeepSeek API Key (Required for resume parsing & chat coaching)
+   DEEPSEEK_API_KEY="sk-your_actual_deepseek_api_key_here"
 
    # Your official custom domain in Hostinger details
    APP_URL="https://yourdomain.com"
@@ -27,7 +27,7 @@ To make the AI-powered features like resume parsing and career coaching work on 
    NODE_ENV="production"
    ```
 
-*Note: Hostinger also allows setting Environment Variables directly inside your hPanel for Node.js Applications. You can paste `GEMINI_API_KEY` and your actual key there.*
+*Note: Hostinger also allows setting Environment Variables directly inside your hPanel for Node.js Applications. You can paste `DEEPSEEK_API_KEY` and your actual key there.*
 
 ---
 
@@ -53,8 +53,8 @@ Hostinger provides a built-in **Node.js App** management panel under **hPanel (W
 ### Step 3: Define Environment Variables
 Inside the Node.js dashboard, go to the **Environment Variables** section:
 - Add a new variable:
-  - **Key:** `GEMINI_API_KEY`
-  - **Value:** *Your actual Gemini API Key (e.g., `AIzaSy...`)*
+  - **Key:** `DEEPSEEK_API_KEY`
+  - **Value:** *Your actual DeepSeek API Key (e.g., `sk-...`)*
 - Add another variable:
   - **Key:** `NODE_ENV`
   - **Value:** `production`
@@ -69,7 +69,7 @@ Inside the Node.js dashboard, go to the **Environment Variables** section:
 
 ### Step 5: Start the Server
 1. Click **Start App** on Hostinger!
-2. Your full-stack carrier intelligence engine is now live and powered by your Gemini API key!
+2. Your full-stack carrier intelligence engine is now live and powered by your DeepSeek API key!
 
 ---
 

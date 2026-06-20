@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { getGeminiClient, classifyGeminiError, createTimeoutSignal } from '../services/geminiClient';
-import { resumeSchema } from '../schemas/resumeSchema';
+import { getDeepSeekClient, classifyDeepSeekError, DEEPSEEK_MODELS } from '../services/deepseekClient';
+import { RESUME_SCHEMA_PROMPT } from '../schemas/resumeSchemaPrompt';
 
 const router = Router();
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
@@ -37,17 +37,15 @@ router.post('/api/analyze-resume', async (req: Request, res: Response) => {
     });
   }
 
-  const ai = getGeminiClient();
+  const ai = getDeepSeekClient();
 
   if (!ai) {
     return res.status(503).json({
-      error: 'Gemini API not configured',
-      message: 'AI analysis is not available because no GEMINI_API_KEY is configured. Please add your API key to the .env file, or use the demo profiles below.',
+      error: 'DeepSeek API not configured',
+      message: 'AI analysis is not available because no DEEPSEEK_API_KEY is configured. Please add your API key to the .env file, or use the demo profiles below.',
       code: 'api_key_missing'
     });
   }
-
-  const timeoutController = createTimeoutSignal(ANALYSIS_TIMEOUT_MS);
 
   try {
     const prompt = `
@@ -56,56 +54,59 @@ router.post('/api/analyze-resume', async (req: Request, res: Response) => {
       The output must correspond EXACTLY to the JSON schema provided below.
     `;
 
-    let contents: any;
+    const schemaPrompt = `${RESUME_SCHEMA_PROMPT}\n\n${prompt}`;
+
+    let userContent: string;
     if (fileData && fileData.data && fileData.mimeType) {
-      contents = {
-        parts: [
-          {
-            inlineData: {
-              mimeType: fileData.mimeType,
-              data: fileData.data
-            }
-          },
-          {
-            text: prompt
-          }
-        ]
-      };
+      // For uploaded files, include metadata since DeepSeek doesn't support inline file data like Gemini
+      const fileDescription = `[File uploaded: ${fileData.mimeType} type, ${Math.ceil((fileData.data.length * 3) / 4 / 1024)}KB]`;
+      userContent = `${schemaPrompt}\n\n${fileDescription}\n\nResume Document Content (extracted text):\n"${resumeText || 'No text extracted from file. The file was uploaded directly. Please analyze based on what you can see.'}"`;
     } else {
-      contents = `
-        ${prompt}
-        
-        Resume Document Content:
-        "${resumeText}"
-      `;
+      userContent = `${schemaPrompt}\n\nResume Document Content:\n"${resumeText}"`;
     }
 
-    let response;
+    let completion;
     try {
-      console.log('Sending parsing request to Gemini high-speed model (gemini-3.5-flash) for instant resume analysis...');
-      response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: contents,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: resumeSchema,
-        }
-      });
+      console.log('Sending parsing request to DeepSeek high-speed model (deepseek-v4-flash) for instant resume analysis...');
+      completion = await ai.chat.completions.create({
+        model: DEEPSEEK_MODELS.primary,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a World-class Career Consultant, HR Director, Workforce Economist, Recruiter and Learning Strategist. You ALWAYS respond with valid JSON only, matching the exact schema provided. No markdown, no code blocks, no explanations outside the JSON.'
+          },
+          {
+            role: 'user',
+            content: userContent
+          }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.1,
+        max_tokens: 16384,
+      }, { timeout: ANALYSIS_TIMEOUT_MS });
     } catch (flashError: any) {
       // Log the fallback
-      console.warn('gemini-3.5-flash failed or not accessible, falling back to gemini-3.1-pro-preview:', flashError.message);
+      console.warn('deepseek-v4-flash failed, falling back to deepseek-v4-pro:', flashError.message);
       
       try {
-        response = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
-          contents: contents,
-          config: {
-            responseMimeType: 'application/json',
-            responseSchema: resumeSchema,
-          }
-        });
+        completion = await ai.chat.completions.create({
+          model: DEEPSEEK_MODELS.fallback,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a World-class Career Consultant, HR Director, Workforce Economist, Recruiter and Learning Strategist. You ALWAYS respond with valid JSON only, matching the exact schema provided. No markdown, no code blocks, no explanations outside the JSON.'
+            },
+            {
+              role: 'user',
+              content: userContent
+            }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.1,
+          max_tokens: 16384,
+        }, { timeout: ANALYSIS_TIMEOUT_MS });
       } catch (fallbackError: any) {
-        const classified = classifyGeminiError(fallbackError);
+        const classified = classifyDeepSeekError(fallbackError);
         return res.status(classified.statusCode).json({
           error: classified.errorType,
           message: classified.userMessage,
@@ -115,7 +116,8 @@ router.post('/api/analyze-resume', async (req: Request, res: Response) => {
       }
     }
 
-    if (!response?.text) {
+    const generatedText = completion?.choices?.[0]?.message?.content;
+    if (!generatedText) {
       return res.status(502).json({
         error: 'empty_response',
         message: 'The AI service returned an empty response. Please try again.',
@@ -123,7 +125,7 @@ router.post('/api/analyze-resume', async (req: Request, res: Response) => {
       });
     }
 
-    const parsedData = JSON.parse(response.text);
+    const parsedData = JSON.parse(generatedText);
     
     // Validate the response has the expected structure
     if (!parsedData.profile || !parsedData.scores) {
@@ -149,7 +151,7 @@ router.post('/api/analyze-resume', async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('Error in resume analysis endpoint:', err);
     
-    const classified = classifyGeminiError(err);
+    const classified = classifyDeepSeekError(err);
     res.status(classified.statusCode).json({
       error: classified.errorType,
       message: classified.userMessage,

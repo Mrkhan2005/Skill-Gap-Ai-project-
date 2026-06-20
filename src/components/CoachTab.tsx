@@ -70,7 +70,7 @@ export default function CoachTab() {
             const assistantMsg: ChatMessage = {
               id: `a-${Date.now()}`,
               role: 'assistant',
-              content: `${simulatedText}\n\n*(AI coaching in offline mode — connect your GEMINI_API_KEY in the .env file for live AI responses)*`,
+              content: `${simulatedText}\n\n*(AI coaching in offline mode — connect your DEEPSEEK_API_KEY in the .env file for live AI responses)*`,
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
             addChatMessage(assistantMsg);
@@ -151,7 +151,7 @@ export default function CoachTab() {
             </div>
             
             <p className="text-[10px] text-slate-400 leading-normal">
-              Empower queries with <strong>gemini-3.1-pro-preview</strong> thinking level set to max reasoning thresholds.
+              Empower queries with <strong>deepseek-v4-pro</strong> thinking level set to max reasoning thresholds.
             </p>
           </div>
 

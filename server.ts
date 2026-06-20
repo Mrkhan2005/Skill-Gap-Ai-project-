@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
-import { initializeGeminiClient } from './server/services/geminiClient';
+import { initializeDeepSeekClient } from './server/services/deepseekClient';
 import analyzeResumeRouter from './server/routes/analyzeResume';
 import chatCoachRouter from './server/routes/chatCoach';
 
@@ -13,13 +13,13 @@ const PORT = 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
-// Initialize the Google GenAI SDK if the key is present
-const apiKey = process.env.GEMINI_API_KEY;
+// Initialize the DeepSeek AI SDK if the key is present
+const apiKey = process.env.DEEPSEEK_API_KEY;
 
 if (apiKey) {
-  initializeGeminiClient(apiKey);
+  initializeDeepSeekClient(apiKey);
 } else {
-  console.warn('GEMINI_API_KEY environment variable not detected. Fallbacks enabled.');
+  console.warn('DEEPSEEK_API_KEY environment variable not detected. Fallbacks enabled.');
 }
 
 // Mount API routes

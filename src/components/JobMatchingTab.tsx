@@ -13,7 +13,7 @@ export default function JobMatchingTab() {
         <div>
           <h2 className="heading-font text-xl md:text-2xl font-bold text-white">Neural Job Matching Engine</h2>
           <p className="text-slate-400 text-xs md:text-sm mt-1">
-            Gemini has evaluated your profile credentials against our active scale corporate developer database to assess alignment.
+            DeepSeek AI has evaluated your profile credentials against our active scale corporate developer database to assess alignment.
           </p>
         </div>
       </div>
