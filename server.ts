@@ -16,22 +16,41 @@ const PORT = 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
-// Initialize the Google GenAI SDK if the key is present
-const apiKey = process.env.GEMINI_API_KEY;
-let ai: GoogleGenAI | null = null;
+// Lazy client getter and format checks to prevent silent build failure or gateway blockages
+let aiClient: GoogleGenAI | null = null;
 
-if (apiKey) {
-  ai = new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
+function getGeminiClient(): GoogleGenAI {
+  const currentKey = process.env.GEMINI_API_KEY;
+  if (!currentKey) {
+    throw new Error('GEMINI_API_KEY environment variable is not configured on the server. Please set your Gemini developer API key (starting with "AIzaSy") inside the Settings > Secrets tab.');
+  }
+  
+  if (!aiClient) {
+    aiClient = new GoogleGenAI({
+      apiKey: currentKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
       },
-    },
-  });
-  console.log('Gemini AI SDK initialized successfully with server security.');
-} else {
-  console.warn('GEMINI_API_KEY environment variable not detected. Fallbacks enabled.');
+    });
+    console.log('Gemini AI SDK Lazy Client created successfully.');
+  }
+  return aiClient;
+}
+
+// Utility to catch and format credential errors into helpful instructions
+function checkAuthError(err: any): { isAuth: boolean; message: string } {
+  const errMsg = err?.message || '';
+  const isAuth = errMsg.includes('UNAUTHENTICATED') || 
+                 errMsg.includes('ACCESS_TOKEN_TYPE_UNSUPPORTED') || 
+                 errMsg.includes('API_KEY_SERVICE_BLOCKED') || 
+                 err?.status === 401;
+                 
+  return {
+    isAuth,
+    message: 'The server detected an unauthenticated or blocked credentials session. If you are running in a restricted sandbox or newly deployed instance, please configure your personal Gemini API Key (starting with "AIza") via the Settings > Secrets tab to activate real-time career diagnostics and coaching panels.'
+  };
 }
 
 // -------------------------------------------------------------
@@ -163,7 +182,7 @@ app.post('/api/analyze-resume', async (req, res) => {
     return res.status(400).json({ error: 'No resume content or file provided for analysis' });
   }
 
-  if (!ai) {
+  if (!process.env.GEMINI_API_KEY) {
     return res.status(503).json({
       error: 'Gemini API not configured on server.',
       message: 'Please configure your GEMINI_API_KEY in the Settings > Secrets tab to enable AI resume parsing.'
@@ -522,7 +541,8 @@ app.post('/api/analyze-resume', async (req, res) => {
     let response;
     try {
       console.log('Sending parsing request to Gemini high-speed model (gemini-3.5-flash) for instant resume analysis...');
-      response = await ai.models.generateContent({
+      const client = getGeminiClient();
+      response = await client.models.generateContent({
         model: 'gemini-3.5-flash',
         contents: contents,
         config: {
@@ -531,15 +551,35 @@ app.post('/api/analyze-resume', async (req, res) => {
         }
       });
     } catch (flashError: any) {
+      const authValidation = checkAuthError(flashError);
+      if (authValidation.isAuth) {
+        return res.status(503).json({
+          error: 'Gemini API Authentication Failed',
+          message: authValidation.message
+        });
+      }
+
       console.warn('gemini-3.5-flash failed or not accessible, falling back to gemini-3.1-pro-preview:', flashError.message);
-      response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: contents,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: resumeSchema,
+      try {
+        const client = getGeminiClient();
+        response = await client.models.generateContent({
+          model: 'gemini-3.1-pro-preview',
+          contents: contents,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: resumeSchema,
+          }
+        });
+      } catch (proError: any) {
+        const proAuthValidation = checkAuthError(proError);
+        if (proAuthValidation.isAuth) {
+          return res.status(503).json({
+            error: 'Gemini API Authentication Failed',
+            message: proAuthValidation.message
+          });
         }
-      });
+        throw proError;
+      }
     }
 
     const parsedData = JSON.parse(response.text || '{}');
@@ -579,7 +619,7 @@ app.post('/api/chat-coach', async (req, res) => {
     return res.status(400).json({ error: 'Messages timeline context is required' });
   }
 
-  if (!ai) {
+  if (!process.env.GEMINI_API_KEY) {
     return res.status(503).json({
       error: 'Gemini API not configured on server.',
       message: 'Consult active profile metrics inside standard dashboard, or set GEMINI_API_KEY in Settings to activate the real-time AI consultant coaching panel.'
@@ -654,22 +694,43 @@ app.post('/api/chat-coach', async (req, res) => {
 
     let response;
     try {
-      response = await ai.models.generateContent({
+      const client = getGeminiClient();
+      response = await client.models.generateContent({
         model: activeModel,
         contents: activeMessages,
         config
       });
     } catch (modelError: any) {
+      const authValidation = checkAuthError(modelError);
+      if (authValidation.isAuth) {
+        return res.status(503).json({
+          error: 'Gemini API Authentication Failed',
+          message: authValidation.message
+        });
+      }
+
       console.warn(`Model ${activeModel} failed to respond or quota exceeded, falling back to gemini-3.5-flash:`, modelError.message);
       // Clean up thinkingConfig as gemini-3.5-flash does not support high thinking config parameters
       if (config.thinkingConfig) {
         delete config.thinkingConfig;
       }
-      response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: activeMessages,
-        config
-      });
+      try {
+        const client = getGeminiClient();
+        response = await client.models.generateContent({
+          model: 'gemini-3.5-flash',
+          contents: activeMessages,
+          config
+        });
+      } catch (fallbackError: any) {
+        const fallbackAuthValidation = checkAuthError(fallbackError);
+        if (fallbackAuthValidation.isAuth) {
+          return res.status(503).json({
+            error: 'Gemini API Authentication Failed',
+            message: fallbackAuthValidation.message
+          });
+        }
+        throw fallbackError;
+      }
     }
 
     const generatedText = response.text || "I was unable to formulate a response. Please rephrase your question.";

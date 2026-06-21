@@ -8,7 +8,7 @@ export default function ResumeUpload() {
   const [dragActive, setDragActive] = useState(false);
   const [pasteMode, setPasteMode] = useState(false);
   const [resumeText, setResumeText] = useState('');
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success' | ''; msg: string }>({ type: '', msg: '' });
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success' | 'warning' | ''; msg: string }>({ type: '', msg: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -132,9 +132,11 @@ export default function ResumeUpload() {
       const isDataAnalyst = fileObj.name.toLowerCase().includes('data') || fileObj.name.toLowerCase().includes('analyst') || fileObj.name.toLowerCase().includes('excel') || fileObj.name.toLowerCase().includes('stat');
       const fallbackResult = isDataAnalyst ? mockDataAnalystResult : mockDeveloperResult;
 
+      const errorMsg = err?.message || 'Server connection timed out.';
+
       setFeedback({ 
-        type: 'success', 
-        msg: `Processed with Career Intelligence offline matching for "${fileObj.name}"! (To parse live resume data on cloud servers, configure your GEMINI_API_KEY in secrets).` 
+        type: 'warning', 
+        msg: `Processed "${fileObj.name}" using local template matching. (Reason: ${errorMsg})` 
       });
 
       setTimeout(() => {
@@ -207,9 +209,11 @@ export default function ResumeUpload() {
       const isDataAnalyst = textToAnalyze.toLowerCase().includes('data') || textToAnalyze.toLowerCase().includes('analyst') || textToAnalyze.toLowerCase().includes('excel');
       const fallbackResult = isDataAnalyst ? mockDataAnalystResult : mockDeveloperResult;
       
+      const errorMsg = err?.message || 'Server connection timed out.';
+
       setFeedback({ 
-        type: 'success', 
-        msg: 'Processed with Career Intelligence local matching! (To parse live resumes on Cloud servers, ensure your GEMINI_API_KEY is configured in Secrets).' 
+        type: 'warning', 
+        msg: `Processed resume details using local template matching. (Reason: ${errorMsg})` 
       });
 
       setTimeout(() => {
@@ -319,13 +323,43 @@ export default function ResumeUpload() {
 
           {/* Feedback message node */}
           {feedback.msg && (
-            <div className={`p-4 rounded-2xl mb-6 flex items-start gap-3 border ${
+            <div className={`p-4 rounded-2xl mb-6 flex flex-col gap-2 border text-left ${
               feedback.type === 'error' 
-                ? 'bg-red-500/10 border-red-500/20 text-red-400' 
-                : 'bg-green-500/10 border-green-500/20 text-green-400'
+                ? 'bg-red-500/10 border-red-500/20 text-red-300' 
+                : feedback.type === 'warning'
+                ? 'bg-amber-500/10 border-amber-500/20 text-amber-300'
+                : 'bg-green-500/10 border-green-500/20 text-green-300'
             }`}>
-              {feedback.type === 'error' ? <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" /> : <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5" />}
-              <p className="text-xs md:text-sm font-medium">{feedback.msg}</p>
+              <div className="flex items-start gap-3">
+                {feedback.type === 'error' ? (
+                  <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-red-400" />
+                ) : feedback.type === 'warning' ? (
+                  <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-amber-400 font-bold animate-pulse" />
+                ) : (
+                  <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5 text-green-400" />
+                )}
+                <div className="flex-1">
+                  <p className="text-xs md:text-sm font-semibold text-white">
+                    {feedback.type === 'error' ? 'Analysis Error' : feedback.type === 'warning' ? 'Offline Fallback Enabled' : 'Success'}
+                  </p>
+                  <p className="text-xs md:text-sm mt-1 leading-relaxed opacity-90">{feedback.msg}</p>
+                  
+                  {feedback.type === 'warning' && (
+                    <div className="mt-3 p-3 bg-slate-950/40 rounded-xl border border-amber-500/10 text-[11px] md:text-xs text-slate-300 space-y-2">
+                      <p className="font-bold text-amber-400 flex items-center gap-1 font-sans">
+                        💡 How to activate live cloud resume analysis:
+                      </p>
+                      <ol className="list-decimal list-inside space-y-1 text-slate-400 font-medium font-sans">
+                        <li>Locate the developer <strong className="text-white">Settings Gear (⚙️)</strong> of your visual workspace.</li>
+                        <li>Click on the <strong className="text-white">Secrets</strong> tab.</li>
+                        <li>Create a secret key with name <strong className="text-white font-mono bg-slate-900 px-1.5 py-0.5 rounded">GEMINI_API_KEY</strong>.</li>
+                        <li>Paste your Google Gemini API Key (starts with <code className="text-amber-300 bg-amber-500/10 px-1 py-0.5 rounded font-mono">AIzaSy</code>) and click save.</li>
+                        <li>Refresh the workspace page or re-upload your resume files for instant premium Cloud analysis!</li>
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
